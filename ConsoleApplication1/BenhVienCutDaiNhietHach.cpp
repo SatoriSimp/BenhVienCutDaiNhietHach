@@ -195,7 +195,7 @@ Entities createSoldier() {
 		soldier.talent = "Meat Shield: This unit take 20% less damage from all sources\n               Noxious Wound (Unique): When this unit is on the battlefield, inflicts all enemy units with 100% 'Grievous Wound', unlimited duration.";
 		soldier.talent += "\n               Brother in Arms (Team): When all friendly units are part of \"101 Logistic Gang\", grants to self and other allies +70 Armor and +100 Magic resist";
 		soldier.spell_1 = "Body Slam (2 mana): Aggressively charges forward, deals 250 + 150% AP magic damage. Against target with 'Bleeding' status, damage increased to 750 + 450% AP";
-		soldier.spell_2 = "Haemorrhage (1 mana): Affects the enemy with 'Bleeding', causes the next source of damage deals an additional 20% HP magic damage. Damage from 'Bleeding' ignores 100 magic resist";
+		soldier.spell_2 = "Haemorrhage (1 mana): Affects the enemy with 'Bleeding'. This effect has no duration and will last until being activated";
 		break;
 	case '8':
 		std::cout << "You chose Bao Duong!";
@@ -220,8 +220,8 @@ Entities createSoldier() {
 		hp = 2850;      ad = 248;       soldier.shield = 2;
 		ap = 0;         ar = 500;       soldier.summonShitcom = true;
 		mr = 250;       rng = 9;
-		soldier.talent = "Rock Dealer: Starts the battle with 2 'Shield' and gains 1 'Shield' every 4 turns, each shield can block 1 instance of damage.\n               When a shield breaks, restores 20% max health.\n               Range is an Advantage (Unique): Gains bonus attack damage bases on current health's difference betweens this unit and their opponent (Only the highest effect of this type is applied)";
-		soldier.talent += "\n               Brother in Arms (Team):When all friendly units are part of \"101 Logistic Gang\", grants to self and other allies 1 'Shield'";
+		soldier.talent = "Rock Dealer: Starts the battle with 2 'Shield' and gradually gains 1 'Shield' for every 4 turns from where the battle starts.\n               Range is an Advantage (Unique): Gains bonus attack damage bases on current health's difference betweens this unit and their opponent (Only the highest effect of this type is applied)";
+		soldier.talent += "\n               Brother in Arms (Team): When all friendly units are part of \"101 Logistic Gang\", grants to self and other allies 1 'Shield'";
 		soldier.spell_1 = "Crag Splitter (3 mana): 'Bind' the target this turn, then deals 260% AD physic damage and restores 9% max health\n(Targets with 'Bind' can not dodge nor graze incoming attack).";
 		soldier.spell_2 = "Summon - Shitcom: This unit summons their best tactical equipment to block damage. Shitcom has 2000 health, 200 armor and 0 magic resist.\n               Overheat: Shitcom continously deals 75 true damage to all enemies. When its health drops to 0, explodes and deal 1200 true damage.\n               (Summoning Shitcom doesn't cost mana, but can only activate once)";
 		break;
@@ -421,7 +421,7 @@ Entities createSoldier(char choice)
 		soldier.talent = "Meat Shield: This unit take 20% less damage from all sources\n               Noxious Wound (Unique): When this unit is on the battlefield, inflicts all enemy units with 100% 'Grievous Wound', unlimited duration.";
 		soldier.talent += "\n               Brother in Arms (Team): When all friendly units are part of \"101 Logistic Gang\", grants to self and other allies +70 Armor and +100 Magic resist";
 		soldier.spell_1 = "Body Slam (2 mana): Aggressively charges forward, deals 250 + 150% AP magic damage. Against target with 'Bleeding' status, damage increased to 750 + 450% AP";
-		soldier.spell_2 = "Haemorrhage (1 mana): Affects the enemy with 'Bleeding', causes the next source of damage deals an additional 20% HP magic damage. Damage from 'Bleeding' ignores 100 magic resist";
+		soldier.spell_2 = "Haemorrhage (1 mana): Affects the enemy with 'Bleeding'. This effect has no duration and will last until being activated";
 		break;
 	case '8':
 	//	std::cout << "You chose Bao Duong!";
@@ -446,8 +446,8 @@ Entities createSoldier(char choice)
 		hp = 2850;      ad = 248;       soldier.shield = 2;
 		ap = 0;         ar = 500;       soldier.summonShitcom = true;
 		mr = 250;       rng = 9;
-		soldier.talent = "Rock Dealer: Starts the battle with 2 'Shield' and gains 1 'Shield' every 4 turns, each shield can block 1 instance of damage.\n               When a shield breaks, restores 20% max health.\n               Range is an Advantage (Unique): Gains bonus attack damage bases on current health's difference betweens this unit and their opponent (Only the highest effect of this type is applied)";
-		soldier.talent += "\n               Brother in Arms (Team):When all friendly units are part of \"101 Logistic Gang\", grants to self and other allies 1 'Shield'";
+		soldier.talent = "Rock Dealer: Starts the battle with 2 'Shield' and gradually gains 1 'Shield' every 4 turns from where the battle starts.\n               Range is an Advantage (Unique): Gains bonus attack damage bases on current health's difference betweens this unit and their opponent (Only the highest effect of this type is applied)";
+		soldier.talent += "\n               Brother in Arms (Team): When all friendly units are part of \"101 Logistic Gang\", grants to self and other allies 1 'Shield'";
 		soldier.spell_1 = "Crag Splitter (3 mana): 'Bind' the target this turn, then deals 260% AD physic damage and restores 9% max health\n(Targets with 'Bind' can not dodge nor graze incoming attack).";
 		soldier.spell_2 = "Summon - Shitcom: This unit summons their best tactical equipment to block damage. Shitcom has 2000 health, 200 armor and 0 magic resist.\n               Overheat: Shitcom continously deals 75 true damage to all enemies. When its health drops to 0, explodes and deal 1200 true damage.\n               (Summoning Shitcom doesn't cost mana, but can only activate once)";
 		break;
@@ -738,7 +738,7 @@ Entities createSpirit(bool info)
 	Entities spirit;
 	spirit.role = "Vengeful Spirit";
 	spirit.trait = "Some reports about their existance has been confirmed a long time ago, their infamous kill potential is notable as they will attack anything within their sight. No one had an idea what made them so aggressive, but they all agree that challenging them while your lifeforce is not strong enough will guarantee a death sentence\n\"A spirit, a soul, a phantasm,... Whatever it's called, this thing is definitely not pleasant at all.\"";
-	spirit.trait += "\nEmotional Adsorption: At the start of battle and after every 5 turns, this unit marks their opponent, attack against marked target deals 18% max health's magic damage. Aftec 3 turns, the mark activates, steals away 6 mana from its target and restores 888 HP. Target that has less than aforementioned quantity will take 9999 true damage.";
+	spirit.trait += "\nEmotional Adsorption: At the start of battle and after every 5 turns, this unit marks their opponent, attack against marked target deals 18% max health's magic damage. Aftec 3 turns, the mark activates, steals away 6 mana from its target and restores 888 HP. Target that has less than required quantity will take 9999 true damage.";
 	spirit.health = rand() % (7900 - 7000 + 1) + 7000;        spirit.omniVamp = 0;
 	spirit.attackDmg = 0;                                     spirit.armor = rand() % (700 - 650 + 1) + 650;
 	spirit.magicRes = spirit.armor - 300;                     spirit.abilityPower = rand() % (300 - 250 + 1) + 250;
@@ -790,10 +790,10 @@ Entities createSinger(bool info)
 	srand(time(NULL));
 	Entities singer;
 	singer.role = "The Singer";
-	singer.trait = "Unknown entity, unclear background, no recent report was found, but there's once a myth about a mysterious creature that shares the same properties with this one:\nThey appear in a black coat, humming an unknown yet pleasing melody. They travel from place to place, bringing their songs to anywhere they came\nEveryone in the country felt in love with these songs, they sang it in every party, celebration or even around the campfire.\nThose days was really enjoyable, but the fun never lasts too long\nJust a few months later, war occurred.\nThe strange thing is, all soldiers in that country - for some reasons - lost all the will to fight, to defense their own hometown. Their bodies no longer response, they could barely pick up their weapon.\nWhat happened next is just the whole tragedy: the vanguards couldn't swing their swords, archers couldn't string their bows. They stood there, looked at the battlefield, stared at eachothers, whispered some weird words, before getting crushed\nEveryone knew that they're dead meat, yet they didn't run, resist, or even felt scared.\nInstead, they started singing...\n\n\"At the end of it all, consciousness began to escape from my mind\nI saw the town I once hated riddled with holes, but this brought me no joy\nThere, I see a wandering traveler\nI hear a strange song, yet somewhat familiar\nI see our mountains\"\n\nDuetto: Attack applies 20% 'Fragile' in 2 turns (Target with 'Fragile' has to take more damage, bonus damage is calculated based on the exact amount).\nEncore: When a 'Fragile' effect runs out, has 50% chance for it to reset the duration.\nHymn of Respite: Becomes \"Low-altitude Hovering\" (can not be targeted), effect lasts until this unit enters \"Soloist\" form\nSoloist: When this unit is the only enemy alive, ATK +20%, attack now deals AoE damage and ignores up to 25% magic resist\nDeaf to all but the Song: Upon death, resurrects all fallen enemies (excluding self), restores 100% of their HP and applies 'Fragile' to all friendly units in 10 turns.";
+	singer.trait = "Unknown entity, unclear background, no recent report was found, but there's once a myth about a mysterious creature that shares the same properties with this one:\nThey appear in a black coat, humming an unknown yet pleasing melody. They travel from place to place, bringing their songs to anywhere they came\nEveryone in the country felt in love with these songs, they sang it in every party, celebration or even around the campfire.\nThose days was really enjoyable, but the fun never lasts too long\nJust a few months later, war occurred.\nThe strange thing is, all soldiers in that country - for some reasons - lost all the will to fight, to defense their own hometown. Their bodies no longer response, they could barely pick up their weapon.\nWhat happened next is just the whole tragedy: the vanguards couldn't swing their swords, archers couldn't string their bows. They stood there, looked at the battlefield, stared at eachothers, whispered some weird words, before getting crushed\nEveryone knew that they're dead meat, yet they didn't run, resist, or even felt scared.\nInstead, they started singing...\n\n\"At the end of it all, consciousness began to escape from my mind\nI saw the town I once hated riddled with holes, but this brought me no joy\nThere, I see a wandering traveler\nI hear a strange song, yet somewhat familiar\nI see our mountains\"\n\nDuetto: Attack applies 20% 'Fragile' in 2 turns.\nEncore: When a 'Fragile' effect runs out, has 50% chance for it to reset the duration.\nHymn of Respite: Becomes \"Low-altitude Hovering\", effect lasts until this unit enters \"Soloist\" form\nSoloist: When this unit is the only enemy alive, ATK +20%, attack now deals AoE damage and ignores up to 25% magic resist\nDeaf to all but the Song: Upon death, resurrects all fallen enemies (excluding self), restores 100% of their HP and applies 'Fragile' to all friendly units in 10 turns.";
 	singer.health = 12345;									   singer.omniVamp = 0;
 	singer.attackDmg = 30;                                     singer.armor = 600;
-	singer.magicRes = 750;									   singer.abilityPower = 325;
+	singer.magicRes = 750;									   singer.abilityPower = 350;
 	singer.isEnemy = true;     singer.isNeutral = false;       singer.isPlayer = false;
 	singer.maxHealth = singer.health;						   singer.baseAP = 350;
 	singer.baseAR = singer.armor;							   singer.baseMR = singer.magicRes;
@@ -826,7 +826,7 @@ Entities createFree(bool info)
 	Entities Free;
 	Free.role = "Free";
 	Free.trait = "A creature that loves to wander around and has no stable behaviour. Due to the fact that no one has ever been attacked by this creature, it is essentially harmless if you don't disturb it. However, further reports showed that it does help increasing the amount of other monsters by healing and saving them. So it looks like you have no other choice...\n\"They don't seem to adore any commonsense at all\""; 
-	Free.trait += "\nWaiting Game: Starts the battle in 'Standby' mode and doesn't attack, but continously heals other enemies for 750 HP each turn, this healing is unaffected by 'Grievous Wound' and will increase its value up to 100% against target with less than 50% max HP, further increase to 200% if the target is below 25% HP.\nUnbound: After being injured, enters 'Combat-ready' mode and start attacking, each attack follows with a shockwave that deals magic damage equals 50% ATK. Every 15% HP loss increases the amount of shockwave by 1";
+	Free.trait += "\nWaiting Game: Starts the battle in 'Standby' mode and continously heals other enemies for 750 HP each turn, this healing is unaffected by 'Grievous Wound' and will increase its value up to 100% against target with less than 50% max HP, further increase to 200% if the target is below 25% HP.\nUnbound: After being injured, enters 'Combat-ready' mode and start attacking, each attack follows with a shockwave that deals magic damage equals 50% ATK. Every 15% HP loss increases the amount of shockwave by 1";
 	Free.health = rand() % (8000 - 7000 + 1) + 7000;           Free.omniVamp = 0;
 	Free.attackDmg = 420;									   Free.armor = rand() % (550 - 500 + 1) + 500;
 	Free.magicRes = Free.armor - 150;						   Free.abilityPower = 0;
@@ -2511,6 +2511,7 @@ void useSpell2_2(Entities* caster, Entities* target1, Entities* target2, Entitie
 					int missingHP = damageOutput(target->armor, 0, target->maxHealth - target->health, 0);
 					damageDeal + missingHP > damageDeal * 3 ? damageDeal *= 3 : damageDeal += missingHP;
 					if (target->fragile) damageDeal = damageDeal * 12 / 10;
+
 					if (target->shield > 0)
 					{
 						target->shield--;
@@ -2523,7 +2524,8 @@ void useSpell2_2(Entities* caster, Entities* target1, Entities* target2, Entitie
 						target->health += target->maxHealth / 5;
 						if (target->health > target->maxHealth) target->health = target->maxHealth;
 					}
-					else if (target->range == 7) damageDeal = damageDeal * 8 / 10;
+
+					if (target->range == 7) damageDeal = damageDeal * 8 / 10;
 					else if (target->fighter) damageDeal /= 10;
 					target->health -= damageDeal;
 					setColor(14);
@@ -3416,10 +3418,10 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 			PlaySound(TEXT("ost\\dawnseeker.wav"), NULL, SND_ASYNC);
 			Sleep(3000);
 			setColor(12);
-			printf("\n\nSoloist: The Singer no longer possess \"Low-altitude hovering\", has significantly increased ATK and inflicts AoE attacks\n");
+			printf("\n\nSoloist: The Singer no longer possess \"Low-altitude hovering\", instead has significantly increased ATK and inflicts AoE attacks\n");
 			singer->solo = true;
 			singer->floating = false;
-			singer->baseAP = 100 + singer->baseAP * 12 / 10, singer->abilityPower = singer->baseAP;
+			singer->baseAP = singer->baseAP * 12 / 10, singer->abilityPower = singer->baseAP;
 			singer->MRpen = 25;
 		}
 
@@ -3542,79 +3544,76 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 			}
 		}
 																												
-		if (turn % 5 == 0 && turn != 0)
+		if (luubao && luubao->health > 0 && luubao->turn % 5 == 0 && luubao->turn != 0)
 		{
-			if (luubao && luubao->range == 10 && luubao->fructure < 3 && luubao->health > 0)
+			setColor(11);
+			std::cout << "Luu Bao gained 1 Structure point!\n";
+			setColor(7);
+			luubao->fructure++;
+			system("pause");
+		}
+
+		if (chimera && chimera->health > 0 && chimera->turn % 5 == 0 && chimera->turn != 0)
+		{
+			if (chimera->divine)
 			{
-				setColor(11);
-				std::cout << "Luu Bao gained 1 Structure point!\n";
+				setColor(14);
+				std::cout << '\n' << chimera->role;
 				setColor(7);
-				luubao->fructure++;
+				std::cout << " switched to ";
+				setColor(12);
+				std::cout << "'Predator' mode\n";
+				setColor(7);
+				std::cout << "Before leaving, they removed all of your good effects, cheer!\n";
+				chimera->divine = false;
+				chimera->predatorMode = true;
+				chimera->critUp = 35;
+				chimera->armor += 400;
+				chimera->magicRes -= 400;
+				chimera->abilityPower = 0;
+				!(singer && singer->challengeMode) ? chimera->attackDmg = 573 : chimera->attackDmg = 573 * 15 / 10;
+				if (pvinh) pvinh->shield = 0;
+				if (duongLe) duongLe->sunBlade = 0;
 				system("pause");
 			}
-
-			if (chimera && chimera->health > 0)
-			{
-				if (chimera->divine)
+			else {
+				setColor(14);
+				std::cout << '\n' << chimera->role;
+				setColor(7);
+				std::cout << " switched to ";
+				setColor(5);
+				std::cout << "'Divine Beast' mode\n";
+				setColor(7);
+				std::cout << "Before leaving, they dealt to ", setColor(14);
+				std::cout << gotAtked->role, setColor(7);
+				chimera->divine = true;
+				chimera->predatorMode = false;
+				chimera->critUp = 0;
+				chimera->armor -= 400;
+				chimera->magicRes += 400;
+				chimera->attackDmg = 0;
+				!(singer && singer->challengeMode) ? chimera->abilityPower = 535 : chimera->abilityPower = 535 * 15 / 10;
+				int lastEmbrace = damageOutput(gotAtked->armor * 4 / 10, 0, 1000, 0);
+				if (gotAtked->fragile > 0) lastEmbrace = lastEmbrace * 12 / 10;
+				if (gotAtked->shield > 0)
 				{
-					setColor(14);
-					std::cout << '\n' << chimera->role;
-					setColor(7);
-					std::cout << " switched to ";
-					setColor(12);
-					std::cout << "'Predator' mode\n";
-					setColor(7);
-					std::cout << "Before leaving, they removed all of your good effects, cheer!\n";
-					chimera->divine = false;
-					chimera->predatorMode = true;
-					chimera->critUp = 35;
-					chimera->armor += 400;
-					chimera->magicRes -= 400;
-					chimera->abilityPower = 0;
-					!(singer&& singer->challengeMode) ? chimera->attackDmg = 573 : chimera->attackDmg = 573 * 15 / 10;
-					if (pvinh) pvinh->shield = 0;
-					if (duongLe) duongLe->sunBlade = 0;
-					system("pause");
+					lastEmbrace = 0;
+					gotAtked->shield--;
+					gotAtked->health += gotAtked->maxHealth / 5;
 				}
-				else {
-					setColor(14);
-					std::cout << '\n' << chimera->role;
-					setColor(7);
-					std::cout << " switched to ";
-					setColor(5);
-					std::cout << "'Divine Beast' mode\n";
-					setColor(7);
-					std::cout << "Before leaving, they dealt to ", setColor(14);
-					std::cout << gotAtked->role, setColor(7);
-					chimera->divine = true;
-					chimera->predatorMode = false;
-					chimera->critUp = 0;
-					chimera->armor -= 400;
-					chimera->magicRes += 400;
-					chimera->attackDmg = 0;
-					!(singer&& singer->challengeMode) ? chimera->abilityPower = 535 : chimera->abilityPower = 535 * 15 / 10;
-					int lastEmbrace = damageOutput(gotAtked->armor * 4 / 10, 0, 1000, 0);
-					if (gotAtked->fragile > 0) lastEmbrace = lastEmbrace * 12 / 10;
-					if (gotAtked->shield > 0)
-					{
-						lastEmbrace = 0;
-						gotAtked->shield--;
-						gotAtked->health += gotAtked->maxHealth / 5;
-					}
-					gotAtked->health -= lastEmbrace;
-					chimera->damageDealt += lastEmbrace;
-					setColor(12);
-					lastEmbrace > 0 ? std::cout << " " << lastEmbrace << " damage " : std::cout << " 0 damage (blocked by shield) ";
-					setColor(7);
-					if (minhphan) lastEmbrace = 0;
-					chimera->health += lastEmbrace * 2;
-					chimera->healingDone += lastEmbrace * 2;
-					std::cout << "and healed themself ";
-					setColor(10);
-					std::cout << lastEmbrace * 2 << " HP!\n";
-					setColor(7);
-					system("pause");
-				}
+				gotAtked->health -= lastEmbrace;
+				chimera->damageDealt += lastEmbrace;
+				setColor(12);
+				lastEmbrace > 0 ? std::cout << " " << lastEmbrace << " damage " : std::cout << " 0 damage (blocked by shield) ";
+				setColor(7);
+				if (minhphan) lastEmbrace = 0;
+				chimera->health += lastEmbrace * 2;
+				chimera->healingDone += lastEmbrace * 2;
+				std::cout << "and healed themself ";
+				setColor(10);
+				std::cout << lastEmbrace * 2 << " HP!\n";
+				setColor(7);
+				system("pause");
 			}
 		}
 
@@ -5904,11 +5903,129 @@ diaryList:
 	goto diaryList;
 }
 
+void programIntroduction()
+{
+	setColor(GRAY);
+	std::cout << "\nThis is some kind of common turn-base game, except for one thing: it has absolutely zero graphic, and you have is text and some gay ass color. End of story!";
+	while (true)
+	{
+		short questionChoose = avoidRetardInput("\n\nChoose a thing you'd like to know more about:\n1. Game mechanics\n2. Return to main menu\nPick a choice: ", 1, 2);
+		setColor(WHITE);
+		if (questionChoose == 1)
+		{
+			setColor(LI_YELLOW);
+			std::cout << "\nGame mechanics: Since you're already familiar with most of these things, I'll just explain about unclear stuffs\n\n", setColor(DA_YELLOW);
+			std::cout << "A. Damage output calculation\n", setColor(GRAY);
+			std::cout << "In case you don't know, I've secretly changed this formula since the previous one contains many issue and makes it really hard to adjust entities' attributes surrounding it.\nThe new formula is way easier to calculate and adjust (also more handleable for future contents as well)\n";
+			setColor(RED);
+			std::cout << "\nDamage calculation formula:\n<Total damage> = <Raw damage> * {1000 - [(<CRT> - <Flat CRT ignorance>) * (100 - <CRT penetration>) / 100]} / 1000\n\n", setColor(LI_GREEN);
+			std::cout << "Notes:", setColor(2);
+			std::cout << "\n+ CRT: stands for \"Corresponding resistance type\" - is either the number of armor (if damage type is physic damage) or magic resist (if damage type is magic damage)\n+ If the CRT surpasses 1000, hypothetically, they receive from 0 to negative damage. But that sure ain't cool at all, thus, enemies whose CRT - after having been subtracted by CRT penetration - still surpass 1000 will be automatically set to 950, which means they're forced to receive at least 5% of the raw damage. However, in the event to which their CRT are extremely high, then they'll be absolutely immune to that type of damage.\n+ To simplify the formula, you just need to know: target gains X% damage reduction, with X is proportional to 10% of the corresponding type of damage resistance. In this case, assume that the enemy has 350 armor and take 1000 physic damage, with no AR pen or lethality is given, that enemy possesses 35% physic damage reduction, which means they only receive 650 damage in total.";
+			std::cout << std::endl;
+			setColor(DA_YELLOW);
+			system("pause");
+			std::cout << "\n\nB. Entities' special status\n", setColor(GRAY);
+			std::cout << "\"Status\" is undoubtedly one of the most interesting part in this kind of 'game', yet it's not easy to remember every of them as well as their effect, so let me summary it for you\n", setColor(LI_CIRNO);
+			std::cout << "\n\nBuff status (or \"Good effects\"):\n\n";
+			std::vector<std::string> buffEff = { "Shield", "Sunblade", "ATK-up", "Reflecting" };
+			std::vector<std::string> buffDes = { "Blocks 1 instance of damage (set the damage to 0) and restores HP to the shield's owner equivalent to 20% of their max HP", "Effect owner gains increased (7 * N)% crit chance and the right to attack extra N times, given N is the current number of \"Sunblade\"", "Converts a certain amount of the next source of damage into health" , "Increases ATK (both AD and AP) by the % of effect" };
+			for (int i = 0; i < buffEff.size(); i++)
+			{
+				short flexibleColorCode;
+				switch (i)
+				{
+				case 0:
+					flexibleColorCode = LI_GREEN;
+					break;
+				case 1:
+					flexibleColorCode = LI_YELLOW;
+					break;
+				case 2:
+					flexibleColorCode = DA_YELLOW;
+					break;
+				default:
+					flexibleColorCode = CIRNO;
+					break;
+				}
+				setColor(flexibleColorCode);
+				std::cout << buffEff[i] << ": ";
+				setColor(GRAY);
+				std::cout << buffDes[i] << '\n';
+			}
+			
+			setColor(BO_RED);
+			std::cout << "\n\nDebuff status (or \"Bad effects\"):\n\n";
+			std::vector<std::string> debuffEff = { "Fragile", "Marked", "Poisoning", "Bleeding", "Taunted", "Silent", "Bind"};
+			std::vector<std::string> debuffDes = { "Amplifies the damage taken by affected unit by the exact % of effect", "Provided by \"Vengeful Spirit\", affected unit loses a certain amount of mana after a period of time, or being executed if they have less than required amount. In the event where the effect causer is knocked down before the mark activates, it gets removed", "Provided by \"Henry Fat\", affected unit has to receive an amount of magic damage after everyturn, and reduce all incoming healing effect from them by 60%. In the event where the effect causer is knocked down while the poison still persists, it will continue to cause damage until completely run out", "The next source of damage on affected unit removes this status and deals additional magic damage proportional to 20% of their max HP, this damage ignores up to 100 magic reist", "Affected unit is forced to use a normal attacker against the effect causer, regardless of their current state or trait", "Affected unit has their special abilities disabled during the effect duration", "Can not dodge nor graze incoming attacks"};
+			for (int i = 0; i < debuffEff.size(); i++)
+			{
+				short flexibleColorCode;
+				switch (i)
+				{
+				case 0:
+					flexibleColorCode = LI_CIRNO;
+					break;
+				case 1:
+					flexibleColorCode = PURPLE;
+					break;
+				case 2:
+					flexibleColorCode = 13;
+					break;
+				case 3:
+					flexibleColorCode = RED;
+					break;
+				case 4:
+					flexibleColorCode = DA_YELLOW;
+					break;
+				case 5:
+					flexibleColorCode = LI_WHITE;
+					break;
+				default:
+					flexibleColorCode = WHITE;
+					break;
+				}
+				setColor(flexibleColorCode);
+				std::cout << debuffEff[i] << ": ";
+				setColor(GRAY);
+				std::cout << debuffDes[i] << '\n';
+			}
+
+			setColor(3);
+			std::cout << "\n\nSpecial status:\n\n";
+			std::vector<std::string> specEff = { "Stand-by / Combat-ready", "Rotting", "Low-altitude Hovering"};
+			std::vector<std::string> specDes = { "Unit with status doesn't attack until being injured", "Unit with status gradually loses HP overtime", "Unit with status can not be targeted directly (AoE and in-direct source of damage works ultimately)" };
+			for (int i = 0; i < specEff.size(); i++)
+			{
+				short flexibleColorCode;
+				switch (i)
+				{
+				case 0:
+					flexibleColorCode = LI_CIRNO;
+					break;
+				case 1:
+					flexibleColorCode = BO_RED;
+					break;
+				default:
+					flexibleColorCode = 13;
+					break;
+				}
+				setColor(flexibleColorCode);
+				std::cout << specEff[i] << ": ";
+				setColor(GRAY);
+				std::cout << specDes[i] << '\n';
+			}
+			
+			setColor(GRAY);
+		}
+		else break;
+	}
+}
+
 void mainMenu()
 {
 	PlaySound(TEXT("ost\\lobby.wav"), NULL, SND_ASYNC | SND_LOOP);
 	setColor(6);
-	std::cout << "Welcome to \"Benh Vien Cut Dai Nhiet Hach\"!\n1. Start now\n2. Diary\n3. How to play?\nOthers: Exit\nChoose action: ";
+	std::cout << "Welcome to \"Benh Vien Cut Dai Nhiet Hach\"!\n1. Start now\n2. Diary\n3. Brief introduction & turtorial\nOthers: Exit\nChoose action: ";
 	char menuSelect;
 	setColor(10);
 	std::cin >> menuSelect;
@@ -5922,7 +6039,7 @@ void mainMenu()
 		diaryProgress();
 		break;
 	case '3':
-		printf("\nShort answer: your pp\nLong answer: your mom\n\n");
+		programIntroduction();
 		break;
 	default:
 		setColor(6);
