@@ -1057,23 +1057,6 @@ int avoidRetardInput(std::string notif, short lowerEnd, short upperEnd)
 	return input;
 }
 
-char avoidRetardCharInput(std::string notif, std::string exceptions)
-{
-	bool isContainedInException = false;
-	char userInput;
-	std::cout << notif;
-	std::cin >> userInput;
-	for (int i = 0; i < exceptions.size(); i++)
-	{
-		if (exceptions[i] == userInput)
-		{
-			isContainedInException = true;
-			break;
-		}
-	}
-	return userInput;
-}
-
 void printHealthBar(Entities* target, int colour)
 {
 	if (target->role == "blank") return;
@@ -4812,6 +4795,7 @@ void chooseSong()
 	setColor(7);
 }
 
+
 void storyModeStart()
 {
 	std::fstream getStoryData("saves\\story.dat");
@@ -4832,11 +4816,12 @@ void storyModeStart()
 	}
 }
 
+
 void gameStart() 
 {
 	short modoChoice;
 	setColor(12);
-	std::cout << "\nSelect combat mode:\n1. Solo\n2. 3v3-Custom: Feel free to choose your units and enemies\n3. 3v3-Packed mode: Enemies units are locked and can not be changed, but you can experience enemies that can not be challenged normally\n4. 3v3 - Tower mode: Starts off normally, but wait, why do these enemies keep spawning...\n???. Stay tune, something wicked this way comes...\nOthers. Return to main menu\nYour choice: ";
+	std::cout << "\nSelect combat mode:\n1. Solo\n2. 3v3-Custom: Feel free to choose your units and enemies\n3. 3v3-Packed mode: Enemies units are locked and can not be changed, but you can experience enemies that can not be challenged normally\n4. 3v3 - Tower mode: Starts off normally, but wait, why do these enemies keep spawning...\n???. Stay tune, something wicked this way comes...\nYour choice: ";
 	setColor(11);
 	std::cin >> modoChoice;
 	
@@ -4846,7 +4831,7 @@ void gameStart()
 		std::cin.ignore();
 		setColor(12);
 		std::cout << "\nInvalid input! Recommend trying again";
-		std::cout << "\nSelect combat mode:\n1. Solo\n2. 3v3-Custom: Feel free to choose your units and enemies\n3. 3v3-Packed mode: Enemies units are locked and can not be changed, but you can experience enemies that can not be challenged normally\n4. 3v3 - Tower mode: Starts off normally, but wait, why do these enemies keep spawning...\nOthers. Return to main menu\nYour choice: ";
+		std::cout << "\nSelect combat mode:\n1. Solo\n2. 3v3-Custom: Feel free to choose your units and enemies\n3. 3v3-Packed mode: Enemies units are locked and can not be changed, but you can experience enemies that can not be challenged normally\n4. 3v3 - Tower mode: Starts off normally, but wait, why do these enemies keep spawning...\n???. Stay tune, something wicked this way comes...\nYour choice: ";
 		setColor(LI_CIRNO);
 		std::cin >> modoChoice;
 	}
