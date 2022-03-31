@@ -94,13 +94,13 @@ int avoidRetardInput(std::string notif, short lowerEnd, short upperEnd)
 	return input;
 }
 
-#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Entities.h>
-#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Enemies.h>
-#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Player_Entities.h>
-#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Damage_and_spell.h>
-#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\playerDataFunctions.h>
-#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\battleProgress.h>
-#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\menu_choices.h>
+#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Headers\Entities.h>
+#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Headers\Enemies.h>
+#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Headers\Player_Entities.h>
+#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Headers\Damage_and_spell.h>
+#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Headers\playerDataFunctions.h>
+#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Headers\battleProgress.h>
+#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Headers\menu_choices.h>
 
 
 

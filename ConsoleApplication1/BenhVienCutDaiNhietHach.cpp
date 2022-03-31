@@ -1,4 +1,4 @@
-﻿#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\define_and_libs.h>
+﻿#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Headers\define_and_libs.h>
 
 int main() {
 	SetConsoleTitle(TEXT("Nicho5, gem turn base không đồ họa dễ nhất mọi thời đại!"));
