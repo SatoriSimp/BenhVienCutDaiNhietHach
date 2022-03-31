@@ -146,7 +146,14 @@
     <ClCompile Include="BenhVienCutDaiNhietHach.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Header.h" />
+    <ClInclude Include="battleProgress.h" />
+    <ClInclude Include="Damage_and_spell.h" />
+    <ClInclude Include="define_and_libs.h" />
+    <ClInclude Include="Enemies.h" />
+    <ClInclude Include="Entities.h" />
+    <ClInclude Include="menu_choices.h" />
+    <ClInclude Include="playerDataFunctions.h" />
+    <ClInclude Include="Player_Entities.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

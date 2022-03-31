@@ -20,7 +20,28 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Header.h">
+    <ClInclude Include="Damage_and_spell.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="define_and_libs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemies.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Player_Entities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu_choices.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="playerDataFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="battleProgress.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

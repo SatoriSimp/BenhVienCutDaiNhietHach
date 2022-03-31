@@ -1,0 +1,31 @@
+
+
+Match seed (randomly generated): 232859
+Result: Victory
+Type: Normal Mode
+Risk Level: 0
+Total turns: 5
+
+Team Combination - Player:
+1. Minh Phan Dong
+Damage dealt: 351
+Healing done: 0
+2. Duong Lee
+Damage dealt: 14214
+Healing done: 1286
+3. Phong Vinh
+Damage dealt: 3693
+Healing done: 0
+
+Team Combination - Enemy:
+1. Goblin champion
+Damage dealt: 0
+Healing done: 0
+2. Senior goblin shaman
+Damage dealt: 444
+Healing done: 0
+3. Zombified Orc
+Damage dealt: 1368
+Healing done: 0
+
+=============================================================================================
