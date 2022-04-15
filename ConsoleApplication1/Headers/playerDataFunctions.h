@@ -7,7 +7,7 @@ void collectDiary(Entities* enemy, Entities* player)
 
 	if (enemy->role == "Goblin champion") dataInput = "RC_1_CLR";
 	else if (enemy->role == "The Singer") dataInput = "RC_2_CLR";
-	else if (enemy->range == 100) dataInput = "RC_4_CLR";
+	else if (enemy->range == 101) dataInput = "RC_4_CLR";
 	else dataInput = "RC_3_CLR";
 
 	diaryData << '\n' << dataInput;
@@ -29,7 +29,7 @@ void collectData(Entities* enemy, Entities* player1, Entities* player2, Entities
 	std::ifstream dataIn("saves\\ditmeluubao.dat");
 	std::ofstream storeData("saves\\data.dat");
 	std::string currentLine, wordToReplace;
-	byte lineNumber = 0;
+	unsigned short lineNumber = 0;
 	switch (pack)
 	{
 	case 1:
@@ -52,6 +52,9 @@ void collectData(Entities* enemy, Entities* player1, Entities* player2, Entities
 		break;
 	case 7:
 		wordToReplace = "P7";
+		break;
+	case 8:
+		wordToReplace = "P8";
 		break;
 	}
 	while (dataIn >> currentLine)

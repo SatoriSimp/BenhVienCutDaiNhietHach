@@ -23,6 +23,7 @@ HANDLE h = GetStdHandle(((DWORD)-11));
 #define WHITE 15
 #define BO_RED 4
 #define PURPLE 5
+#define LI_PURPLE 13
 #define DA_YELLOW 6
 #define LI_CIRNO 11
 #define GRAY 8
@@ -32,7 +33,7 @@ HANDLE h = GetStdHandle(((DWORD)-11));
 #pragma comment(lib, "winmm.lib")
 
 short pack = 0, risk = 0;
-bool skipTurnBanned = false;
+bool skipTurnBanned = false, forbidInteruptMenuTheme = false;
 bool runningProgram = true, reduceManaRequirement = false, recollectOpStart = false, recollectOperationAccomplish = false, towerMode = false;
 const int fighterBaseAD = 375;
 bool flag = false;
@@ -94,13 +95,13 @@ int avoidRetardInput(std::string notif, short lowerEnd, short upperEnd)
 	return input;
 }
 
-#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Headers\Entities.h>
-#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Headers\Enemies.h>
-#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Headers\Player_Entities.h>
-#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Headers\Damage_and_spell.h>
-#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Headers\playerDataFunctions.h>
-#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Headers\battleProgress.h>
-#include<D:\C++ storage\ABetterGems\nicho5\ConsoleApplication1\Headers\menu_choices.h>
+#include ".\Headers\Entities.h"
+#include ".\Headers\Enemies.h"
+#include ".\Headers\Player_Entities.h"
+#include ".\Headers\Damage_and_spell.h"
+#include ".\Headers\playerDataFunctions.h"
+#include ".\Headers\battleProgress.h"
+#include ".\Headers\menu_choices.h"
 
 
 

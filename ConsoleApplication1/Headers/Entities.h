@@ -40,8 +40,12 @@ void printPlayerInfo(Entities* soldier)
 	std::cout << "\nHealth: " << soldier->health;
 	setColor(RED);
 	std::cout << "\nAttack damage: " << soldier->attackDmg;
-	setColor(PURPLE);
+	setColor(4);
+	std::cout << "\nArmor penetration: " << soldier->ARpen << "%";
+	setColor(5);
 	std::cout << "\nAbility power: " << soldier->abilityPower;
+	setColor(13);
+	std::cout << "\nMagic penetration: " << soldier->MRpen << "%";
 	setColor(BO_RED);
 	std::cout << "\nLife steal: " << soldier->omniVamp << "%";
 	setColor(DA_YELLOW);
@@ -81,11 +85,13 @@ void printEnemyInfo(Entities* enemy)
 	std::cout << "\nHealth: ";
 	std::cout << enemy->health;
 	setColor(RED);
-	std::cout << "\nAttack damage: ";
-	std::cout << enemy->attackDmg;
+	std::cout << "\nAttack damage: " << enemy->attackDmg;
+	setColor(BO_RED);
+	std::cout << "\nArmor penetration: " << enemy->ARpen << "%";
 	setColor(PURPLE);
-	std::cout << "\nAbility power: ";
-	std::cout << enemy->abilityPower;
+	std::cout << "\nAbility power: " << enemy->abilityPower;
+	setColor(LI_PURPLE);
+	std::cout << "\nMagic penetration: " << enemy->MRpen << "%";
 	setColor(DA_YELLOW);
 	std::cout << "\nArmor: " << enemy->armor;
 	setColor(LI_CIRNO);
@@ -125,7 +131,7 @@ void printHealthBar(Entities* target, int colour)
 	std::cout << percentHP << " %";
 	if (target->health > 0)
 	{
-		if (target->shield > 0)
+		if (target->shield)
 		{
 			setColor(2);
 			percentHP == 100 ? printf("   Current 'Shield': ") : percentHP >= 10 ? printf("    Current 'Shield': ") : printf("     Current 'Shield': ");

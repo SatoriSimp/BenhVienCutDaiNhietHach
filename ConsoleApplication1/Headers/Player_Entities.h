@@ -82,7 +82,7 @@ Entities createSoldier() {
 		ap = 600;       ar = 250;
 		mr = 400;   rng = 4;
 		soldier.talent = "Quick Charge (Unique): Normal attacks instead recover 2 mana, this unit also gains 3 bonus mana at the start of battle";
-		soldier.spell_1 = "Volcano: Consume all mana, then gain 150 ability power and attacks an enemy with 200% AP. Damage type change to 'True', each mana spent increases damage output by 50 + 20%";
+		soldier.spell_1 = "Volcano: Consume all mana, then attacks the enemy with 200% AP. Damage type change to 'True', each mana spent increases damage output by 80 + 42%";
 		soldier.spell_2 = "Meteorite (3 mana): Deals 230% AP magic damage to all enemies, damage output is calculated based on the enemy with LEAST magic resist. This damage can not be blocked nor grazed, and can not trigger other effects";
 		break;
 	case '5':
@@ -134,7 +134,7 @@ Entities createSoldier() {
 		hp = 2350;      ad = 370;
 		ap = 0;         ar = 350;
 		mr = 270;       rng = 8;
-		soldier.talent = "Sword Rain: After every turn, receives 1 Sun Blade, stores up to 4. Every existing Sun Blade increases crit chance by 7%.\nWhenever this unit uses a basic attack, attacks an additional time with each Sun Blade owns";
+		soldier.talent = "Sword Rain: After every turn, receives 1 Sun Blade, stores up to 4.\n               Stilling Breath: Every existing Sun Blade increases crit chance by 7% and ATK by 5%, capped at 20%\n               Whenever this unit uses a basic attack, attacks an additional time with each Sun Blade owns";
 		soldier.talent += "\n               Brother in Arms (Team): When all friendly units are part of \"101 Logistic Gang\", grants to self and other allies +10% Armor & Magic penetration";
 		soldier.spell_2 = "Five Signs of the Dying Deva (3 mana): Multiplies current Sun Blade by 4, then attack enemy with 15% armor penetration. After this skill ends, removes all Sun Blades and forbids this unit from obtaining Sun Blade this turn";
 		soldier.spell_1 = "Menacing Slash (2 mana): Immediately generates 1 Sun Blade, then attack the enemy.\nIf this unit already reached maxium Sun Blades, the attack benefits from 40% omni vamp and deals additional magic damage equals 2% max health each strike";
@@ -145,7 +145,7 @@ Entities createSoldier() {
 		soldier.tags = "Defense, DPS, Survival";
 		soldier.nation = "101 Logistic Gang";
 		soldier.quotes = "One step closer to my new lap, and fumo, and house, and light novel. What do you mean pida? Screw it";
-		hp = 2850;      ad = 248;       soldier.shield = 2;
+		hp = 2880;      ad = 360;       soldier.shield = 2;
 		ap = 0;         ar = 500;       soldier.summonShitcom = true;
 		mr = 250;       rng = 9;
 		soldier.talent = "Rock Dealer: Starts the battle with 2 'Shield' and gradually gains 1 'Shield' for every 4 turns from where the battle starts.\n               Range is an Advantage (Unique): Gains bonus attack damage bases on current health's difference betweens this unit and their opponent (Only the highest effect of this type is applied)";
@@ -160,7 +160,7 @@ Entities createSoldier() {
 		soldier.tags = "Summon, Nuker, DPS";
 		hp = 1880;      ad = 65;        soldier.fructure = 3;
 		ap = 350;       ar = 210;
-		mr = 350;        rng = 10;
+		mr = 350;       rng = 10;
 		soldier.talent = "Mechanical Egineer (Unique): Can rapidly manufactures and commands 'Machine' in combat (up to 3).\n               Machine: Costs 1 structure point to deploy and will attack enemy everyturn using their chainsaw (starts with 3 and gains 1 point every 5 turns). Has 1500 HP, 270 attack damage, 90 armor, 1 magic resist and more likely to be attacked.\n               ";
 		soldier.talent += "Sneak Shot: Whenever a friendly unit uses their first skill, all Machines attack the target one additional time\n               Emergency Repair: When there is atleast 1 'Machine', normal attack instead heals the machine with least HP for 100% AP";
 		soldier.spell_1 = "Chainsaw Extension Module (3 mana): Commands all 'Machine' to attack the enemy, each deals 300% ATK + 4% max HP physic damage. When there're more than 2 'Machine', all 'Machine' attack with 50% armor penetration";
@@ -191,18 +191,18 @@ Entities createSoldier() {
 		soldier.spell_2 = "Harsh Training (3 mana): Removes all bad effects from self or an ally and grants to them 1 'Shield'. Each shield can block 1 instance of damage and restores 20% HP on break";
 		soldier.spell_1 = "Radioactive (2 mana): Deals 200 + 150% AD as magic damage to an enemy and inflicts them with 20% 'Fragile' (up to 40% against normal attack), lasts 3 turns.";
 		break;
-		/*
-		case 'd': case 'D':
-			std::cout << "You chose Withered Duong Lee!\n\"He's on summer vacation, thus he sleeps\"";
-			soldier.role = "Alter Duong";
-			hp = 2150;     ad = 70;
-			ap = 530;      ar = 100;
-			mr = 75;       rng = 13;
-			soldier.talent = "Nightmare: Attack against \"Sleeping\" enemies won't interrupt them and deals an additional true damage equals 50% AP + 8% target's HP";
-			soldier.spell_1 = "Eternal Spring Dream: Put an enemies into \"Sleep\" in 2 turns, making them unable to attack or use special ability. Taking damage will immediately end their \"Sleeping\" status";
-			soldier.spell_2 = "Spiritual Destruction: Attack all enemies, deals 125% AP magic damage and perform an additional attack against \"Sleeping\" target";
-			break;
-		*/
+	case 'd': case 'D':
+		std::cout << "You chose Thien Tri!\n\"He's on summer vacation, thus he sleeps\"";
+		soldier.role = "Thien Tri";
+		soldier.nation = "Nero Homies";
+		soldier.tags = "Support";
+		hp = 2300;     ad = 170;
+		ap = 430;      ar = 280;
+		mr = 600;      rng = 13;
+		soldier.talent = "Electrical Overcharged: When this unit is on the battlefield, all summoned units HP +50%, Magic reist +300 and regenerates 10% HP every turn\n               Portable Energy Source: Attacks leave a mark that stacks on the target. Friendly units' attacks trigger all the current marks, each deals an additional 300 magic damage and restore 1 mana to the attacker";
+		soldier.spell_1 = "Superconduct (3 mana): Strikes an enemy, dealing magic damage proportional to 155% AP + 100% target's armor and leaves 2 stacks of passive";
+		soldier.spell_2 = "Zap (2 mana): Enhances self's next attack or ability, deals an additional magic equals 88% AP, enemies other than primary target also suffer from this attack, takes 50% of the raw damage";
+		break;
 	default:
 		std::cout << "You chose Luu Bao the Corrupting Brain!";
 		soldier.role = "Luu Bao the Corrupting Brain";
@@ -230,8 +230,12 @@ Entities createSoldier() {
 	std::cout << "\nHealth: " << soldier.health;
 	setColor(12);
 	std::cout << "\nAttack damage: " << soldier.attackDmg;
+	setColor(4);
+	std::cout << "\nArmor penetration: " << soldier.ARpen << "%";
 	setColor(5);
 	std::cout << "\nAbility power: " << soldier.abilityPower;
+	setColor(13);
+	std::cout << "\nMagic penetration: " << soldier.MRpen << "%";
 	setColor(4);
 	std::cout << "\nLife steal: " << soldier.omniVamp << "%";
 	setColor(6);
@@ -292,7 +296,7 @@ Entities createSoldier(char choice)
 		soldier.role = "Maskman";
 		soldier.tags = "DPS, Survival";
 		soldier.nation = "Royal Warrior";
-		hp = 2100;      ad = 580;      vamp = 10;
+		hp = 2100;      ad = 580;       vamp = 10;
 		ar = 300;       mr = 250;       soldier.critUp = 45;
 		rng = 3;        ap = 0;
 		soldier.talent = "Sharp Eyes: Crit chance increases to 60% and gains 10% life steal (capped at 50%).\n               Cut Down (Unique): Deals increased damage against target with greater max health than this unit (bonus damage is capped at 100% at 200% greater max health)";
@@ -300,7 +304,7 @@ Entities createSoldier(char choice)
 		soldier.spell_2 = "Absolute Focus (2 mana): Permanently gain 50 AD and 10% life steal, then attack with 100% AD";
 		break;
 	case '4':
-		//	std::cout << "You chose Caster class!";
+		//  std::cout << "You chose Caster class!";
 		soldier.role = "Caster";
 		soldier.tags = "AoE, Nuker";
 		soldier.nation = "Royal Warrior";
@@ -308,8 +312,8 @@ Entities createSoldier(char choice)
 		ap = 600;       ar = 250;
 		mr = 400;   rng = 4;
 		soldier.talent = "Quick Charge (Unique): Normal attacks instead recover 2 mana, this unit also gains 3 bonus mana at the start of battle";
-		soldier.spell_1 = "Volcano: Consume all mana, then gain 300 ability power and attacks an enemy with 200% AP. Damage type change to 'True', each mana spent increases damage output by 50 + 20%";
-		soldier.spell_2 = "Solo - Genesis: Doesn't attack this round, resistances drop to 0 and take extra 100% damage, but prevents HP from falling below 1. After this skill ends, gains 6 + 1 mana per 75 damage taken. Can only activate once throughout the battle\n               Teamfight - Meteorite (3 mana): Deals 230% AP magic damage to all enemies, damage output is calculated based on the enemy with LEAST magic resist. This damage can not be blocked nor grazed, and can not trigger other effects";
+		soldier.spell_1 = "Volcano: Consume all mana, then attacks the enemy with 200% AP. Damage type change to 'True', each mana spent increases damage output by 80 + 42%";
+		soldier.spell_2 = "Meteorite (3 mana): Deals 230% AP magic damage to all enemies, damage output is calculated based on the enemy with LEAST magic resist. This damage can not be blocked nor grazed, and can not trigger other effects";
 		break;
 	case '5':
 		//	std::cout << "You chose Specialist class!";
@@ -357,7 +361,7 @@ Entities createSoldier(char choice)
 		soldier.quotes = "Better call my mama again";
 		soldier.tags = "DPS, Survival";
 		soldier.nation = "101 Logistic Gang";
-		hp = 2350;      ad = 320;
+		hp = 2350;      ad = 370;
 		ap = 0;         ar = 350;
 		mr = 270;       rng = 8;
 		soldier.talent = "Sword Rain: After every turn, receives 1 Sun Blade, stores up to 4. Every existing Sun Blade increases crit chance by 7%.\nWhenever this unit uses a basic attack, attacks an additional time with each Sun Blade owns";
@@ -371,7 +375,7 @@ Entities createSoldier(char choice)
 		soldier.tags = "Defense, DPS, Survival";
 		soldier.nation = "101 Logistic Gang";
 		soldier.quotes = "One step closer to my new lap, and fumo, and house, and light novel. What do you mean pida? Screw it";
-		hp = 2850;      ad = 248;       soldier.shield = 2;
+		hp = 2880;      ad = 360;       soldier.shield = 2;
 		ap = 0;         ar = 500;       soldier.summonShitcom = true;
 		mr = 250;       rng = 9;
 		soldier.talent = "Rock Dealer: Starts the battle with 2 'Shield' and gradually gains 1 'Shield' every 4 turns from where the battle starts.\n               Range is an Advantage (Unique): Gains bonus attack damage bases on current health's difference betweens this unit and their opponent (Only the highest effect of this type is applied)";

@@ -168,42 +168,14 @@ void chooseSong()
 {
 	setColor(8);
 	bool errorChoice = false;
-	int songSelection = avoidRetardInput("Choose song:\n1. Dusk dragon\n2. Towerfierce\n3. Lostmemory\n4. Church\n5. Shield\n6. Kalt'sit Team\n7. Random pick\n8. Select custom song\n0. No song pls im fine\nInput: ", 0, 8);
-	if (songSelection != 8)
-	{
-		songSelection == 7 ? songSelection = rand() % (6 - 1 + 1) + 1 : songSelection = songSelection;
-		songSelection != 0 ? printf("Now playing: ") : printf("No song was choosen!");
-	}
+	int songSelection = avoidRetardInput("Choose song:\n1. Select custom song\n0. No song pls im fine\nInput: ", 0, 1);
 	switch (songSelection)
 	{
 	case 0:
+		printf("No song was choosen!\n");
 		PlaySound(NULL, NULL, NULL);
 		break;
 	case 1:
-		PlaySound(TEXT("ost\\duskdragon.wav"), NULL, SND_LOOP | SND_ASYNC | SND_FILENAME);
-		printf("Dusk dragon");
-		break;
-	case 2:
-		PlaySound(TEXT("ost\\towerfierce.wav"), NULL, SND_LOOP | SND_ASYNC | SND_FILENAME);
-		printf("Towerfierce");
-		break;
-	case 3:
-		PlaySound(TEXT("ost\\lostmemory.wav"), NULL, SND_LOOP | SND_ASYNC | SND_FILENAME);
-		printf("Lost memory");
-		break;
-	case 4:
-		PlaySound(TEXT("ost\\church.wav"), NULL, SND_LOOP | SND_ASYNC | SND_FILENAME);
-		printf("Church");
-		break;
-	case 5:
-		PlaySound(TEXT("ost\\shield.wav"), NULL, SND_LOOP | SND_ASYNC | SND_FILENAME);
-		printf("Shield");
-		break;
-	case 6:
-		PlaySound(TEXT("ost\\kalt.wav"), NULL, SND_LOOP | SND_ASYNC | SND_FILENAME);
-		printf("Kalt'sit Team");
-		break;
-	case 8:
 		std::string foldName = "ost\\", tempSong;
 		std::string songName;
 		setColor(8);
@@ -239,6 +211,7 @@ void chooseSong()
 
 void diaryProgress()
 {
+	forbidInteruptMenuTheme = true;
 	setColor(10);
 	printf("\nFinding diary");
 	for (int i = 0; i < 4; i++)
@@ -253,14 +226,66 @@ void diaryProgress()
 
 diaryList:
 	reduceManaRequirement = false;
-	std::fstream diaryDat("saves\\diary.dat");
+	std::fstream unlockRelDiary("saves\\data.dat");
 	std::string importDiary;
+	bool unlockedDiary1 = false, unlockedDiary2 = false, unlockedDiary3 = false, unlockedDiary4 = false;
+	short currentLine = 0, packCompleted = 0, triCompleted = 0;
+	while (unlockRelDiary >> importDiary)
+	{
+		currentLine++;
+		if (importDiary == "NR" || importDiary == "CM") packCompleted++;
+		else if (importDiary == "RS")
+		{
+			packCompleted++;
+			triCompleted++;
+		}
+		if (currentLine == 5 && (importDiary == "CM" || importDiary == "RS")) unlockedDiary2 = true;
+		if (packCompleted >= 3 && !unlockedDiary1) unlockedDiary1 = true;
+		if (packCompleted >= 5 && !unlockedDiary3 && triCompleted) unlockedDiary3 = true;
+	}
+	if (unlockedDiary1 && unlockedDiary2 && unlockedDiary3) unlockedDiary4 = true;
+	unlockRelDiary.close();
 	bool reCleared = false;
 	bool proceedOperation = false, unlockedDiary = false;
 	char diarySelect, startOP;
-	std::cout << "\nPage 1. Unnamed diary #1\nPage 2. Unnamed diary #2\nPage 3. Unnamed diary #3\nX. Back to main menu\nOpen page: ";
+	std::string diaryName;
+	for (int i = 1; i <= 4; i++)
+	{
+		std::string page = i == 1 ? "1" : i == 2 ? "2" : i == 3 ? "3" : "4";
+		diaryName += "\nPage " + page + "." + " ";
+		switch (i)
+		{
+		case 1:
+			diaryName += unlockedDiary1 ? "Village up North" : "Unnamed diary #1";
+			break;
+		case 2:
+			diaryName += unlockedDiary2 ? "Rain in the Forest" : "Unnamed diary #2";
+			break;
+		case 3:
+			diaryName += unlockedDiary3 ? "Unexplained Fever" : "Unnamed diary #3";
+			break;
+		case 4:
+			diaryName += unlockedDiary4 ? "Winterwind" : "? ? ?";
+			break;
+		}
+	}
+	diaryName += "\nX. Return to main menu\nYour choice: ";
+	setColor(7);
+	std::cout << diaryName;
+	setColor(LI_GREEN);
 	std::cin >> diarySelect;
 	if (diarySelect == 'x' || diarySelect == 'X') return;
+	else if (diarySelect == '4' && !unlockedDiary4)
+	{
+		short diaRecolOpen = 0;
+		if (unlockedDiary1) diaRecolOpen++;
+		if (unlockedDiary2) diaRecolOpen++;
+		if (unlockedDiary3) diaRecolOpen++;
+		std::cin.clear();
+		setColor(BO_RED);
+		std::cout << "\nThis page is not yet available!\nPage unlock/Recollection unlock condition: Open all recollection for the others diaries first (" << diaRecolOpen << "/3 opened)\n";
+		goto diaryList;
+	}
 	printf("\nPress 'S' for fast skip, others to read manually: ");
 	char skip;
 	bool skippin = false;
@@ -316,24 +341,13 @@ diaryList:
 		}
 
 		setColor(6);
-		std::ifstream diaryStuff("saves\\data.dat");
-		std::string unlockCondition;
-		short packCompleted = 0;
-		while (diaryStuff >> unlockCondition)
+		std::fstream diaryDat("saves\\diary.dat");
+		std::string imDiaryDat;
+		if (unlockedDiary1)
 		{
-			if (unlockCondition == "NR" || unlockCondition == "CM" || unlockCondition == "RS") packCompleted++;
-			if (packCompleted >= 3)
+			while (diaryDat >> imDiaryDat)
 			{
-				unlockedDiary = true;
-				break;
-			}
-		}
-		diaryStuff.close();
-		if (unlockedDiary)
-		{
-			while (diaryDat >> importDiary)
-			{
-				if (importDiary == "RC_1_CLR") {
+				if (imDiaryDat == "RC_1_CLR") {
 					reCleared = true;
 					break;
 				}
@@ -397,8 +411,16 @@ diaryList:
 		}
 		else
 		{
+			short packCompleted = 0;
+			std::ifstream packComCount("saves\\data.dat");
+			std::string currentData;
+			while (packComCount >> currentData)
+			{
+				if (currentData == "NR" || currentData == "CM" || currentData == "RS") packCompleted++;
+			}
 			setColor(12);
 			std::cout << "\nRecollection not yet available!\nUnlock condition: Complete atleast 3 packs in normal mode or more (" << packCompleted << "/3 completed)\n", setColor(7);
+			packComCount.close();
 		}
 		break;
 	}
@@ -441,20 +463,15 @@ diaryList:
 			std::cout << diary[i];
 		}
 
-		std::ifstream diaryStuff("saves\\data.dat");
+		std::ifstream diaryDat("saves\\diary.dat");
 		short currentLine = 0;
 		std::string getData;
-		while (diaryStuff >> getData)
-		{
-			currentLine++;
-			if (currentLine == 5 && (getData == "CM" || getData == "RS")) unlockedDiary = true;
-		}
 
-		if (unlockedDiary)
+		if (unlockedDiary2)
 		{
-			while (diaryDat >> importDiary)
+			while (diaryDat >> getData)
 			{
-				if (importDiary == "RC_2_CLR") {
+				if (getData == "RC_2_CLR") {
 					reCleared = true;
 					break;
 				}
@@ -475,8 +492,8 @@ diaryList:
 			setColor(7);
 			if (startOP == 'Y' || startOP == 'y')
 			{
-				std::string des = "\nTwilight has overpassed, darkness began to asset its domination unto the boundless firmanent.\nDespite all of that, someone still hasn't found their way home.\nNo one ever considers it as a big deal. For them, things like that is just a commonsense in this crazy town, whatsoever.";
-				std::string cond = "\n\nConditions:\n- Fixed squad: Player units are settled: Caster, Duong Le, Luu Bao.\n- Enemies combination: The Singer, Reaper, Chimera.\n- Reaper will always perform AoE attack.\n- Chimera instead starts the battle in 'Predator' mode.\n- Luu Bao has -1 structure point.\n- Runes are temporary disabled.\n\n";
+				std::string des = "\nTwilight has overpassed, darkness has begun to asset its domination unto the boundless firmanent.\nDespite all of that, someone still hasn't found their way home.";
+				std::string cond = "\n\nConditions:\n- Fixed squad: Player units are settled: Caster, Duong Le, Luu Bao.\n- Enemies combination: The Singer, Reaper, Chimera.\n- Reaper has -25% ATK but will always perform AoE attack.\n- Chimera instead starts the battle in 'Predator' mode.\n- Duong Le gains an additional 10% omni vamp\n- Runes are temporary disabled.\n\n";
 				setColor(8);
 				Sleep(2000);
 				for (int i = 0; i < std::size(des); i++)
@@ -493,8 +510,10 @@ diaryList:
 				system("pause");
 				Entities player1 = createSoldier('4'), player2 = createSoldier('8'), player3 = createSoldier('a');
 				Entities enemy1 = createSinger(0), enemy2 = createShinigami(0), enemy3 = createChimera(0);
-				player3.fructure--;
+				player2.omniVamp += 10;
 				enemy2.challengeMode = true;
+				enemy2.baseAD = enemy2.baseAD * 3 / 4;
+				enemy2.attackDmg = enemy2.baseAD;
 				enemy3.predatorMode = true, enemy3.divine = false;
 				enemy3.armor += 400, enemy3.magicRes -= 400;
 				enemy3.abilityPower = 0, enemy3.attackDmg = 535;
@@ -564,30 +583,18 @@ diaryList:
 		}
 
 		setColor(6);
-		std::ifstream diaryStuff("saves\\data.dat");
+		std::ifstream diaryStuff("saves\\diary.dat");
 		std::string dataExport;
-		short packCompleted = 0, tribCompleted = 0;
-		while (diaryStuff >> dataExport)
+		if (unlockedDiary3)
 		{
-			if (dataExport == "RS") { packCompleted++; tribCompleted++; }
-			else if (dataExport == "NR" || dataExport == "CM") packCompleted++;
-			if (packCompleted >= 5 && tribCompleted >= 1)
+			while (diaryStuff >> dataExport)
 			{
-				unlockedDiary = true;
-				break;
-			}
-		}
-		diaryStuff.close();
-		if (unlockedDiary)
-		{
-			while (diaryDat >> importDiary)
-			{
-				if (importDiary == "RC_3_CLR") {
+				if (dataExport == "RC_3_CLR") {
 					reCleared = true;
 					break;
 				}
 			}
-			diaryDat.close();
+			diaryStuff.close();
 
 			if (reCleared)
 			{
@@ -633,28 +640,46 @@ diaryList:
 		}
 		else
 		{
+			short packCompleted = 0;
+			bool tribCompleted = false;
+			std::ifstream packComCount("saves\\data.dat");
+			std::string currentData;
+			while (packComCount >> currentData)
+			{
+				if (currentData == "NR" || currentData == "CM" || currentData == "RS") packCompleted++;
+				if (currentData == "RS") tribCompleted = true;
+			}
 			setColor(12);
 			std::cout << "\nRecollection not yet available!\nUnlock condition: Complete 5 packs, atleast 1 or more is completed in Tribulation Mode (" << packCompleted << "/5 completed) (" << tribCompleted << "/1 tribulation completed)\n", setColor(7);
+			packComCount.close();
 		}
 		break;
 	}
 	case '4':
 	{
-		std::string intro = "\nPage number 4\n\nDate: 21/6/XX43\nWeather: Perfect\n\n<------------------------------------------------------------->\n";
+		std::string intro = "\nPage number 4\n\nDate: 11/11/XX43\nWeather:\n\n<------------------------------------------------------------->\n";
 		Sleep(1900);
 		for (int i = 0; i < std::size(intro); i++)
 		{
 			int waitTime = 100;
-			if (i < 14) { setColor(13); }
-			else if (i <= 54) { setColor(11); waitTime = waitTime * 3 / 4; }
-			else { setColor(12); waitTime /= 5; }
 			if (skippin) waitTime = 0;
+
+			if (i < 14) { setColor(13); }
+			else if (i <= 40) { setColor(11); waitTime = waitTime * 3 / 4; }
+			else { setColor(12); waitTime /= 5; }
 			Sleep(waitTime);
 			std::cout << intro[i];
 		}
 		std::string diary;
-		diary += "\nJust who is this guy?\nHe suddenly showed up out from nowhere, marching into own town, by all himself alone.\nBut, it's clear as day that he's definitely up to no good.\n";
-		diary += "I can tell it, no, everyone can tell it just by sensing the eerie atmostsphere omitting from \"that thing\"";
+		diary += "\nJust who is this guy?\nHe suddenly showed up out from nowhere, marching into own town, by all himself alone.\nMore importantly, what are those negative thoughts surrounding my head? That could be anyone, it's really commonsense for someone to come into this town.\nYet, I still couldn't think straight, something feels really odd here.\n";
+		diary += "That eerie omnious vines omitting from him makes me feel uncomfortable. And, somehow, I can tell that he's definietly up to no good.\n";
+		diary += "\nAs he walking closer, I started to see him more clearly.\nAppear in a black custom, wearing mask, carrying a blade, all of this properties, could only lead to one possibility.\nHowever, however, by all means, I hope it isn't true, I hope it isn't...\nOne of the most terrifying force of the military,\nthat guy, is not doubt, ";
+		diary += "an \"Emperors' Blade\"\n";
+		diary += "\nThese infamous walking catastrophe are widely known for their aberrant strength, both in destructive power and durability during combat.\nOne \"Emperors' Blade\" alone is already terrifying.\nThis one standing here, furthermore, is an exception of exceptions.\n";
+		diary += "That red scar running along their spine, not too massive, but not too hard to notice its existence, indicates one thing:\n";
+		diary += "He is one of the survivors on the battlefield called \"Valley of the Setting Sun\", a battle that killed many other \"Emperors' Blade\".\nHe's also referred as ";
+		diary += "\"The Pursuer\".";
+		diary += "\nNot many people know this, and also don't concern why I know this.\nEven though I want to tell you, I'm afraid my time has run out.\nWherever \"Emperors' Blade\" set their foot to, they bring nothing but deaths and annhilations.\nYep, this town is pretty much screwed up already.\n\n";
 		for (int i = 0; i < std::size(diary); i++)
 		{
 			if (!skippin)
@@ -664,7 +689,7 @@ diaryList:
 				else Sleep(25);
 			}
 
-			if (i >= 168 && i <= 168 + 106)
+			if ((i >= 334 && i <= 335 + 131) || (i >= 335 + 135 + 326 - 7 && i <= 335 + 135 + 326 - 7 + 20) || (i >= 335 + 135 + 326 - 7 + 20 + 258 + 122 && i <= 335 + 135 + 326 - 7 + 20 + 258 + 122 + 156 + 13))
 			{
 				setColor(14);
 			}
@@ -690,28 +715,66 @@ diaryList:
 			}
 		}
 		diaryStuff.close();
-		if (unlockedDiary)
+		std::fstream diaryDat("saves\\diary.dat");
+		while (diaryDat >> importDiary)
 		{
-			while (diaryDat >> importDiary)
-			{
-				if (importDiary == "RC_4_CLR") {
-					reCleared = true;
-					break;
-				}
+			if (importDiary == "RC_4_CLR") {
+				reCleared = true;
+				break;
 			}
-			diaryDat.close();
+		}
+		diaryDat.close();
 
-			if (reCleared)
+		if (reCleared)
+		{
+			setColor(10);
+			std::cout << "\nRecollection for this diary is already cleared!\nRedo it? (Y/N) ", setColor(14);
+		}
+		else
+		{
+			std::cout << "\nStart recollection now? (Y/N) ", setColor(12);
+		}
+		std::cin >> startOP;
+		setColor(7);
+		if (startOP == 'y' || startOP == 'Y')
+		{
+			std::string des = "\nAnd so on, there was really nothing left.\nAnd so on, that whole town has been completely whipped off within just a day.\nOnes who feared, ones who resisted, ones who tried to escape, all of their effort were equally worthless afterall.\nNone could withstand, against the true aberrance of pure strength.\nNone could withstand, against the one whose blade stained crimson.\n\nAnother winter has come, broken, yet harrowing.\nScorched diary, can no longer be written.\n";
+			des += "Snowfall, Blackening the Earth.";
+			std::string cond = "\n\nConditions:\n- Fixed squad: Player units are settled: Minh Phan, Duong Le, Phong Vinh\n- Emergency Reinforcement: Player is allowed to have their second squad - Alter Vinh, Maskman, Defender.\n- When an allied unit in the main squad is knocked down, an unit in the second squad with proportional position will replace them to continue fighting\n- All player units gain +200 Armor and +100 AD. Substitute units also gain +3 initial mana\n- Enemy unit: \"Emperors' Blade\"\n- \"Emperors' Blade\" starts the battle in \"Pursuer Form\"\n- The %HP threshold to apply 'Fragile' increases to 65%\n- Available runes (main squad): Duong Le - Exploit Weaknesses, Minh Phan - Reincarnation, Phong Vinh - Cooper Seal.\n- Available runes (backup squad): Maskman - Exploit Weaknesses, Alter Vinh - Reincarnation, Defender - Cooper Seal\n\n";
+			setColor(8);
+			Sleep(2000);
+			for (int i = 0; i < std::size(des); i++)
 			{
-				setColor(10);
-				std::cout << "\nRecollection for this diary is already cleared!\nRedo it? (Y/N) ", setColor(14);
+				Sleep(25);
+				if (i > 462) Sleep(55);
+				if (i > 0 && (des[i - 1] == '\n' || des[i - 1] == '.')) Sleep(950);
+				else if (i > 0 && des[i - 1] == ',') Sleep(650);
+				std::cout << des[i];
 			}
-			else
-			{
-				std::cout << "\nStart recollection now? (Y/N) ", setColor(12);
-			}
-			std::cin >> startOP;
+			Sleep(2000);
+			setColor(6);
+			std::cout << cond;
 			setColor(7);
+			system("pause");
+			Entities player1 = createSoldier('7'), player2 = createSoldier('8'), player3 = createSoldier('9');
+			Entities enemy1 = createBlade(0), enemy2 = createBlankTarget(), enemy3 = createBlankTarget();
+			player1.baseAR += 200, player2.baseAR += 200, player3.baseAR += 200;
+			player1.armor += 200, player2.armor += 200, player3.armor += 200;
+			player1.baseAD += 100, player2.baseAD += 100, player3.baseAD += 100;
+			player1.attackDmg += 100, player2.attackDmg += 100, player3.attackDmg += 100;
+			player2.exploit = true, player1.reincarnation = true, player3.cooperSeal = true;
+			enemy1.armor += 222, enemy1.magicRes += 200, enemy1.attackDmg += 200, enemy1.baseAD += 200;
+			enemy1.maxHealth = 21500, enemy1.health = 21500;
+			enemy1.role = "Emperors' Blade - The Pursuer";
+			PlaySound(NULL, NULL, NULL);
+			setColor(12);
+			std::cout << "\nWarning: The difficulty of this operation is extremely high, proceed with caution!\n";
+			setColor(7);
+			Sleep(2000);
+			PlaySound(TEXT("ost\\emblade_extra.wav"), NULL, SND_ASYNC | SND_LOOP);
+			proceedOperation = true;
+			recollectOpStart = true;
+			battleStart_3v3(&player1, &player2, &player3, &enemy1, &enemy2, &enemy3);
 		}
 	}
 	}
@@ -1337,6 +1400,13 @@ void gameStart()
 				PlaySound(TEXT("ost\\frontline.wav"), NULL, SND_LOOP | SND_ASYNC);
 				Sleep(2000);
 			}
+			else if (towerMode) {
+				PlaySound(NULL, NULL, NULL);
+				setColor(8);
+				std::cout << "Form-up, and get ready! Together, we'll fight alongside in the endless darkness!\n", setColor(7);
+				PlaySound(TEXT("ost\\exterminate.wav"), NULL, SND_ASYNC | SND_LOOP);
+				Sleep(2000);
+			}
 			else chooseSong();
 			battleStart_3v3(&player, &player2, &player3, &enemy, &enemy2, &enemy3);
 		}
@@ -1346,6 +1416,7 @@ void gameStart()
 
 void programIntroduction()
 {
+	forbidInteruptMenuTheme = true;
 	setColor(GRAY);
 	std::cout << "\nThis is some kind of common turn-base game, except for one thing: it has absolutely zero graphic, and you have is text and some gay ass color. End of story!";
 	while (true)
@@ -1355,7 +1426,7 @@ void programIntroduction()
 		if (questionChoose == 1)
 		{
 			setColor(LI_YELLOW);
-			std::cout << "\nGame mechanics: Since you're already familiar with most of these things, I'll just explain about unclear stuffs\n\n", setColor(DA_YELLOW);
+			std::cout << "\nGame mechanics: Since you're already familiar with most of mechanics, I'll just explain about unclear stuffs\n\n", setColor(DA_YELLOW);
 			std::cout << "A. Damage output calculation\n", setColor(GRAY);
 			std::cout << "In case you don't know, I've secretly changed this formula since the previous one contains many issue and makes it really hard to adjust entities' attributes surrounding it.\nThe new formula is way easier to calculate and adjust (also more handleable for future contents as well)\n";
 			setColor(RED);
@@ -1396,7 +1467,7 @@ void programIntroduction()
 
 			setColor(BO_RED);
 			std::cout << "\n\nDebuff status (or \"Bad effects\"):\n\n";
-			std::vector<std::string> debuffEff = { "Fragile", "Marked", "Poisoning", "Bleeding", "Taunted", "Silent", "Bind" };
+			std::vector<std::string> debuffEff = { "Fragile", "Marked", "Poisoning", "Bleeding", "Taunted", "Silent", "Bind / Bound" };
 			std::vector<std::string> debuffDes = { "Amplifies the damage taken by affected unit by the exact % of effect", "Provided by \"Vengeful Spirit\", affected unit loses a certain amount of mana after a period of time, or being executed if they have less than required amount. In the event where the effect causer is      knocked down before the mark activates, it gets removed", "Provided by \"Henry Fat\", affected unit has to receive an amount of magic damage after everyturn, and reduce all incoming healing effect from them by 60%. In the event where the effect causer is       knocked down while the poison still persists, it will continue to cause damage until completely run out", "The next source of damage on affected unit removes this status and deals additional magic damage proportional to 20% of their max HP, this damage ignores up to 100 magic reist", "Affected unit is forced to use a normal attacker against the effect causer, regardless of their current state or trait", "Affected unit has their special abilities disabled during the effect duration", "Can not dodge nor graze incoming attacks" };
 			for (int i = 0; i < debuffEff.size(); i++)
 			{
@@ -1464,7 +1535,8 @@ void programIntroduction()
 
 void mainMenu()
 {
-	PlaySound(TEXT("ost\\lobby.wav"), NULL, SND_ASYNC | SND_LOOP);
+	if (!forbidInteruptMenuTheme) PlaySound(TEXT("ost\\lobby.wav"), NULL, SND_ASYNC | SND_LOOP);
+	else forbidInteruptMenuTheme = false;
 	setColor(6);
 	std::cout << "Welcome to \"Benh Vien Cut Dai Nhiet Hach\"!\n1. Start now\n2. Diary\n3. Brief introduction & turtorial\nOthers: Exit\nChoose action: ";
 	char menuSelect;

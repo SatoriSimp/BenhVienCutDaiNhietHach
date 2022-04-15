@@ -72,6 +72,7 @@ Entities createSeniorShaman(bool info) {
 	goblin.attackDmg = 100;                             goblin.omniVamp = 0;
 	goblin.armor = rand() % (200 - 150 + 1) + 150;      goblin.magicRes = 300 + goblin.armor;
 	goblin.abilityPower = 100 + goblin.magicRes;        goblin.health = rand() % (4000 - 3000 + 1) + 3000;
+	goblin.MRpen = 20;
 	goblin.isEnemy = true;      goblin.isPlayer = false;        goblin.isNeutral = false;
 	goblin.maxHealth = goblin.health;
 	goblin.range = 54;
@@ -83,10 +84,11 @@ Entities createZombieOrc(bool info) {
 	srand(time(NULL));
 	Entities orc;
 	orc.role = "Zombified Orc";
-	orc.trait = "Rotten kind of life-form. Has massive strength and resistance, capable of self-healing bases on damage dealt. However, they gradually lose HP and resistances over time.\nTalent: Attack ignores 40% armor and heals themself for 60% damage dealt, but loses 5% max HP and 20% current resistances every turn\n";
+	orc.trait = "Rotten kind of life-form. Has massive strength and resistance, capable of self-healing bases on damage dealt. However, they gradually lose HP and resistances over time.\nRemnant Ash: Attack ignores 40% armor and heals themself for 60% damage dealt, but loses 5% max HP and 20% current resistances every turn\n";
 	orc.health = rand() % (12000 - 9000 + 1) + 9000;	  orc.omniVamp = 60;
 	orc.attackDmg = rand() % (700 - 600 + 1) + 600;		  orc.magicRes = 575;
 	orc.armor = 600;									  orc.abilityPower = 0;
+	orc.ARpen = 40;
 	orc.isEnemy = true;      orc.isPlayer = false;        orc.isNeutral = false;
 	orc.maxHealth = orc.health;
 	orc.baseAR = orc.armor, orc.baseMR = orc.magicRes;
@@ -202,7 +204,7 @@ Entities createSinger(bool info)
 	srand(time(NULL));
 	Entities singer;
 	singer.role = "The Singer";
-	singer.trait = "Unknown entity, unclear background, no recent report was found, but there's once a myth about a mysterious creature that shares the same properties with this one:\nThey appear in a black coat, humming an unknown yet pleasing melody. They travel from place to place, bringing their songs to anywhere they came\nEveryone in the country felt in love with these songs, they sang it in every party, celebration or even around the campfire.\nThose days was really enjoyable, but the fun never lasts too long\nJust a few months later, war occurred.\nThe strange thing is, all soldiers in that country - for some reasons - lost all the will to fight, to defense their own hometown. Their bodies no longer response, they could barely pick up their weapon.\nWhat happened next is just the whole tragedy: the vanguards couldn't swing their swords, archers couldn't string their bows. They stood there, looked at the battlefield, stared at eachothers, whispered some weird words, before getting crushed\nEveryone knew that they're dead meat, yet they didn't run, resist, or even felt scared.\nInstead, they started singing...\n\n\"At the end of it all, consciousness began to escape from my mind\nI saw the town I once hated riddled with holes, but this brought me no joy\nThere, I see a wandering traveler\nI hear a strange song, yet somewhat familiar\nI see our mountains\"\n\nDuetto: Attack applies 20% 'Fragile' in 2 turns.\nEncore: When a 'Fragile' effect runs out, has 50% chance for it to reset the duration.\nHymn of Respite: Becomes \"Low-altitude Hovering\", effect lasts until this unit enters \"Soloist\" form\nSoloist: When this unit is the only enemy alive, ATK +20%, attack now deals AoE damage and ignores up to 25% magic resist\nDeaf to all but the Song: Upon death, resurrects all fallen enemies (excluding self), restores 100% of their HP and applies 'Fragile' to all friendly units in 10 turns.";
+	singer.trait = "Unknown entity, unclear background, no recent report was found, but there's once a myth about a mysterious creature that shares the same properties with this one:\nThey appear in a black coat, humming an unknown yet pleasing melody. They travel from place to place, bringing their songs to anywhere they came\nEveryone in the country felt in love with these songs, they sang it in every party, celebration or even around the campfire.\nTime passed over, after that traveller left the town for a really long time, war occurred: a conflict betweem two nations, common story.\nYet, the strange thing is, all soldiers in that country - for some reasons - lost all the will to fight, to defense their own hometown. Their bodies no longer response, they could barely pick up their weapon.\nWhat happened next is just the whole stage of tragedy: vanguards couldn't swing their swords, archers couldn't string their bows. They dead standing there, looked at the battlefield, stared at eachothers, whispered some weird words, before getting crushed by enemies' fire power.\nEveryone knew that they're dead meat, yet they didn't run, resist, or even felt scared.\nInstead, they started singing...\n\n\"At the end of it all, consciousness began to escape from my mind\nI saw the town I once hated riddled with holes, but this brought me no joy\nThere, I see a wandering traveler\nI hear a strange song, yet somewhat familiar\nI see our mountains\"\n\nAblities:\n\nDuetto: Attack applies 20% 'Fragile' in 2 turns.\nEncore: When a 'Fragile' effect runs out, has 50% chance for it to reset the duration.\nHymn of Respite: Becomes \"Low-altitude Hovering\", effect lasts until this unit enters \"Soloist\" form\nSoloist: When this unit is the only enemy alive, ATK +20%, attack now deals AoE damage and ignores up to 25% magic resist\nDeaf to all but the Song: Upon death, resurrects all fallen enemies (excluding self), restores 100% of their HP and applies 'Fragile' to all friendly units in 10 turns.";
 	singer.health = 12345;									   singer.omniVamp = 0;
 	singer.attackDmg = 30;                                     singer.armor = 600;
 	singer.magicRes = 750;									   singer.abilityPower = 350;
@@ -219,11 +221,12 @@ Entities createShinigami(bool info)
 	srand(time(NULL));
 	Entities reaper;
 	reaper.role = "Reaper";
-	reaper.trait = "The most ancient so-called creature that has been existed for centuries. With the scythe that has tasted many deaths by their \"hands\", they'll take away the life of even the most fragile creature. Their appearance may appears modern, yet the method they use is primitive at their root: Always go for the weaks first\n";
+	reaper.trait = "The most ancient so-called creature that has been existed for centuries. Equipped with the scythe that has tasted many deaths, they'll take away the life of even the most fragile creature. Their appearance may appears modern, yet the method they use is primitive at their root: Always go for the weaks first\n";
 	reaper.trait += "Scythe: Attack prioritizes non-summoned target with least HP, regardless of their likelihood of being targetted\nReap: In the 4th turn and every 3 turns afterwards, performs an AoE attack that deals 133% ATK and deals extra physic damage equivalent to 100% target's missing health (won't surpass 399% ATK). If this attack takes down atleast 1 non-summon target, this unit will immediately recast it";
 	reaper.health = rand() % (10000 - 9000 + 1) + 9000;        reaper.omniVamp = 0;
 	reaper.attackDmg = 555;                                    reaper.armor = rand() % (500 - 450 + 1) + 450;
 	reaper.magicRes = reaper.armor * 6 / 10;                   reaper.abilityPower = 0;
+	reaper.baseAD = 555;
 	reaper.isEnemy = true;     reaper.isNeutral = false;       reaper.isPlayer = false;
 	reaper.maxHealth = reaper.health;						   reaper.baseAP = 0;
 	reaper.baseAR = reaper.armor;							   reaper.baseMR = reaper.magicRes;
@@ -256,9 +259,9 @@ Entities createPosKnight(bool info)
 	Entities knight;
 	knight.role = "Enraged Possessed Soldier";
 	knight.trait = "Used to be normal soldier, but has completely given in to primal madness as their lifeforce is consumed. The appearance of such an aberration on the battllefield is almost beyond imagination\n\"Something fell down from their pocket, it's a letter written by hand, yet impossible to read\"\nFinal Warcry: Has extremely high ATK and gradually loses HP overtime";
-	knight.health = rand() % (8000 - 7000 + 1) + 7000;         knight.omniVamp = 0;
-	knight.attackDmg = rand() % (1800 - 1750 + 1) + 1750;      knight.armor = rand() % (600 - 560 + 1) + 560;
-	knight.magicRes = knight.armor * 13 / 10 + 15;             knight.abilityPower = 0;
+	knight.health = rand() % (10000 - 9500 + 1) + 9500;        knight.omniVamp = 0;
+	knight.attackDmg = rand() % (1800 - 1750 + 1) + 1750;      knight.armor = rand() % (400 - 350 + 1) + 350;
+	knight.magicRes = 600;									   knight.abilityPower = 0;
 	knight.isEnemy = true;     knight.isNeutral = false;       knight.isPlayer = false;
 	knight.maxHealth = knight.health;						   knight.baseAP = 0;
 	knight.baseAR = knight.armor;							   knight.baseMR = knight.magicRes;
@@ -274,9 +277,9 @@ Entities createPosKnight_L(bool info)
 	Entities knight;
 	knight.role = "Enraged Possessed Bone-Thrower";
 	knight.trait = "Used to be normal archer, but has completely given in to primal madness as their lifeforce is consumed. They will even rip out anything inside their bodies to throw because of their deadened sense of pain\n\"That bow laying on the ground seems completely broken down, there's a name inscribed on it\"\nFinal Warcry: Has ridiculously high ATK, increased crit chance and armor penetration. Gradually loses even more HP overtime";
-	knight.health = rand() % (6000 - 5500 + 1) + 5500;         knight.omniVamp = 0;
-	knight.attackDmg = rand() % (2200 - 2100 + 1) + 2100;      knight.armor = rand() % (400 - 390 + 1) + 390;
-	knight.magicRes = knight.armor * 13 / 10 + 15;             knight.abilityPower = 0;
+	knight.health = rand() % (9500 - 9000 + 1) + 9000;         knight.omniVamp = 0;
+	knight.attackDmg = rand() % (2200 - 2100 + 1) + 2100;      knight.armor = rand() % (200 - 150 + 1) + 150;
+	knight.magicRes = 550;									   knight.abilityPower = 0;
 	knight.isEnemy = true;     knight.isNeutral = false;       knight.isPlayer = false;
 	knight.maxHealth = knight.health;						   knight.baseAP = 0;
 	knight.baseAR = knight.armor;							   knight.baseMR = knight.magicRes;
@@ -292,7 +295,7 @@ Entities createCorKnight(bool info)
 	Entities knight;
 	knight.role = "Corrupted Bladeweaver";
 	knight.trait = "A warrior that can not be seen or summoned using regular methods. Few reports show that they usually come in pair, and serve under a mysterious blade wielder.\nTheir loyalty is absolute and known as unshakable. Should their master ever needs their help, they'll even sacrifice their own life in order to support him\nCommand - Meltdown: First attack of this unit permanently decreases target's armor by 40% and removes all current buffs on them. Whenever \"Emperors' Blade - The Pursuer\" is injured, drains 15% of self HP to heal him for an equivalent amount";
-	knight.health = rand() % (7000 - 6000 + 1) + 6000;         knight.omniVamp = 0;
+	knight.health = rand() % (8000 - 7500 + 1) + 7500;         knight.omniVamp = 0;
 	knight.attackDmg = rand() % (800 - 650 + 1) + 650;         knight.armor = rand() % (750 - 720 + 1) + 720;
 	knight.magicRes = knight.armor + 200;					   knight.abilityPower = 0;
 	knight.isEnemy = true;     knight.isNeutral = false;       knight.isPlayer = false;
@@ -310,7 +313,7 @@ Entities createCorKnight_L(bool info)
 	Entities knight;
 	knight.role = "Corrupted Wolrdcruser";
 	knight.trait = "A caster that can not be seen or summoned using regular methods. Few reports show that they usually come in pair, and serve under a mysterious blade wielder.\nTheir loyalty is absolute and known as unshakable. Should their master ever needs their help, they'll even sacrifice their own life in order to support him\nCommand - Meltdown: First attack of this unit deals true damage and removes all mana of its target. Whenever \"Emperors' Blade - The Pursuer\" attacks, drains 10% of self HP to deal an equivalent amount of magic damage to its target";
-	knight.health = rand() % (6000 - 5000 + 1) + 5000;         knight.omniVamp = 0;
+	knight.health = rand() % (6000 - 5500 + 1) + 5500;         knight.omniVamp = 0;
 	knight.attackDmg = 0;									   knight.armor = rand() % (550 - 520 + 1) + 520;
 	knight.magicRes = knight.armor + 400;				       knight.abilityPower = rand() % (1100 - 1050 + 1) + 1050;
 	knight.isEnemy = true;     knight.isNeutral = false;       knight.isPlayer = false;
@@ -329,7 +332,7 @@ Entities createPosDef(bool info)
 	knight.role = "Possessed Heavy Defender";
 	knight.trait = "A heavy defender that has been controlled by an unknown entity, capable of regenerating rapidly. Well-protected by elite tactical gear, the appearance of such an aberration on the battlefield is almost beyond imagination.\n\nShield-up: Has extremely high armor. Regenerates 5% max HP every turn and ignores 'Grievous Wound'. Every 3 turns, taunts all non-summed friendly units, forces them to use a normal attack against this unit";
 	knight.health = rand() % (10000 - 8500 + 1) + 8500;        knight.omniVamp = 0;
-	knight.attackDmg = rand() % (300 - 200 + 1) + 200;         knight.armor = rand() % (900 - 850 + 1) + 850;
+	knight.attackDmg = rand() % (300 - 200 + 1) + 200;         knight.armor = rand() % (1000 - 950 + 1) + 950;
 	knight.magicRes = rand() % (300 - 250 + 1) + 250;          knight.abilityPower = 0;
 	knight.isEnemy = true;     knight.isNeutral = false;       knight.isPlayer = false;
 	knight.maxHealth = knight.health;						   knight.baseAP = 0;
@@ -385,28 +388,31 @@ Entities createBlade(bool info)
 	Entities knight;
 	knight.role = "Emperors' Blades";
 	knight.trait = "A manifestation of a certain will. The most terrifying military force, they are widely-known throughout the world only as horrifying spectres of legend and yore. A single one is enough to slaughter entire squads. Defeat has never been a possibility.\n\"They are, in fact, a walking catastrophe\"\n";
-	knight.trait += "\nDominion: Attack ignores a certain amount of defense and applies 'Fragile' to target with less than 50% HP, damage is increased dramatically when attack 'Fragile' target. Every attack permanently increases this unit's ATK, up to a total 5 times\nCollapsing Fear: All allied units are inflicted with 60% 'Grievous Wound' for a permanent duration. The first time HP drops to 0, immediately recovers all HP and enters \"Pursuer\" phase, gains greatly increased stats.\nDuring \"Pursuer\" phase, refreshes 'Grievous Wound' debuff and casts \"Collapsing Fear\" periodically, deals physic damage to all allied units, and attacks check its target's HP to apply 'Fragile' an additional time, after they have received the damage.";
+	knight.trait += "\nDominion: Attack ignores a certain amount of defense and applies 'Fragile' to target with less than 50% HP.\nUnrelenting Conqueror: Damage is increased dramatically when attack 'Fragile' target. Every attack permanently increases this unit's ATK, up to a total 5 times\nCollapsing Fear: All allied units are permanently inflicted with 60% 'Grievous Wound'. The first time HP drops to 0, immediately recovers all HP and enters \"Pursuer\" phase, gains greatly increased stats.\nDuring \"Pursuer\" phase, refreshes 'Grievous Wound' debuff and casts \"Collapsing Fear\" periodically, dealing physic damage to all allied units, and attacks check its target's HP to apply 'Fragile' an additional time, after they have received the damage.";
 	knight.health = 12500;									   knight.omniVamp = 0;
-	knight.attackDmg = 900;									   knight.armor = 555;
+	knight.attackDmg = 500;									   knight.armor = 555;
 	knight.magicRes = 799;									   knight.abilityPower = 0;
 	knight.isEnemy = true;     knight.isNeutral = false;       knight.isPlayer = false;
 	knight.maxHealth = knight.health;						   knight.baseAP = 0;
 	knight.baseAD = knight.attackDmg;						   knight.stack = 5;
 	knight.baseAR = knight.armor;							   knight.baseMR = knight.magicRes;
 	knight.range = 101;										   knight.ARpen = 50;
-	if (info) printEnemyInfo(&knight);
-	char detail;
-	setColor(6);
-	printf("\nView further details (Y/N)? ");
-	setColor(11);
-	std::cin >> detail;
-	setColor(7);
-	if (detail == 'Y' || detail == 'y')
+	if (info)
 	{
-		setColor(12);
-		std::cout << "\nATK gains: +80 per stack (+400 at max)\nArmor penetration: 50%\n'Fragile' increased damage: 300% base damage\n\nDuring second phase:\n\"Pursuer\" phase's health: 21500";
-		std::cout << "\nATK buff: +300\nArmor buff: +222\nResistance buff: +200\n\"Collapsing Fear\" casts: whenever current turn is divisible by 3\n\"Collapsing Fear\" scales = 80% ATK\n";
-		system("pause");
+		printEnemyInfo(&knight);
+		char detail;
+		setColor(6);
+		printf("\nView further details (Y/N)? ");
+		setColor(11);
+		std::cin >> detail;
+		setColor(7);
+		if (detail == 'Y' || detail == 'y')
+		{
+			setColor(12);
+			std::cout << "\nATK gains: +160 per stack (+800 at max)\nArmor penetration: 50%\n'Fragile' increased damage: 300% base damage\n\nDuring second phase:\n\"Pursuer\" phase's health: 21500";
+			std::cout << "\nATK buff: +300\nArmor buff: +222\nResistance buff: +200\n\"Collapsing Fear\" casts: whenever current turn is divisible by 3\n\"Collapsing Fear\" scales = 80% ATK\n";
+			system("pause");
+		}
 	}
 	return knight;
 }
