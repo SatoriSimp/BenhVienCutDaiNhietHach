@@ -7,7 +7,7 @@ public:
 	//attribute
 	bool isPlayer, isEnemy, isNeutral;
 	//player speciality
-	bool emergencyOn = false, readytoDodge = false, genesisUsed = false, healingBanned = false, bleeding = false, extension = false;
+	bool emergencyOn = false, readytoDodge = false, genesisUsed = false, healingBanned = false, bleeding = false, extension = false, meditating = false;
 	bool obtainingSunblade = true, resistanceBonus = false, summonShitcom = false, buffed = false, antiDeath = false, specialForce = false, fighter = false, anhquoc = false;
 	//enemy speciality
 	bool challengeMode = false, predatorMode = false, divine = false, welcome = false, solo = false, standBy = false, combat = false, firstStrike = false, floating = false;
@@ -16,11 +16,11 @@ public:
 	//rune offe
 	bool insult = false, deathmatch = false, exploit = false;
 	//standard attribute
-	int attackDmg, abilityPower, armor, magicRes, range, omniVamp, mana, baseAD = 0, baseAP = 0, baseAR = 0, baseMR = 0, critUp = 0, ARpen = 0, MRpen = 0;
+	int attackDmg, abilityPower, armor, magicRes, range, omniVamp, mana = 0, baseAD = 0, baseAP = 0, baseAR = 0, baseMR = 0, critUp = 0, ARpen = 0, MRpen = 0;
 	short turn = 0;
 	long health, maxHealth;
 	//player speciality
-	int sunBlade = 0, shield = 0, b, fructure = 0, autoDestruct = 0, adrenaile = 0, defBoost = 0;
+	int sunBlade = 0, shield = 0, b, fructure = 0, autoDestruct = 0, adrenaile = 0, defBoost = 0, absoluteFocus = 0;
 	//enemy speciality
 	int possessTalent = 0, possessTalent2 = 0, poisoned = 0, spiritMark = 0, fragile = 0, shockwave = 1, taunt = 0, stack = 0;
 
@@ -46,6 +46,8 @@ void printPlayerInfo(Entities* soldier)
 	std::cout << "\nAbility power: " << soldier->abilityPower;
 	setColor(13);
 	std::cout << "\nMagic penetration: " << soldier->MRpen << "%";
+	setColor(RED);
+	std::cout << "\nCritical chance: " << ((soldier->range == 13) ? 0 : soldier->critUp + 15 + 7 * soldier->sunBlade) << "%";
 	setColor(BO_RED);
 	std::cout << "\nLife steal: " << soldier->omniVamp << "%";
 	setColor(DA_YELLOW);
@@ -113,7 +115,9 @@ void printHealthBar(Entities* target, int colour)
 		target->spiritMark = 0;
 	}
 	setColor(colour);
-	std::cout << '\n' << target->role << "'s health: ";
+	std::cout << '\n' << target->role;
+	if (!target->isPlayer && towerMode && target->range != -100) std::cout << " Imitator";
+	std::cout << "'s health: ";
 	std::cout << target->health << '\n';
 	int playerMissingHealth = target->maxHealth - target->health, player2percentHealth = target->maxHealth * 2 / 100;
 	int playerMissingBar = playerMissingHealth / player2percentHealth;

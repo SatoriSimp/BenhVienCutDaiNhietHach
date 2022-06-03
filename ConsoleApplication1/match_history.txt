@@ -29,3 +29,153 @@ Damage dealt: 1368
 Healing done: 0
 
 =============================================================================================
+
+Match seed (randomly generated): 733665
+Result: Victory
+Type: Normal Mode
+Risk Level: 0
+Total turns: 10
+
+Team Combination - Player:
+1. Minh Phan Dong
+Damage dealt: 55808
+Healing done: 0
+2. blank
+Damage dealt: 0
+Healing done: 0
+3. blank
+Damage dealt: 0
+Healing done: 0
+
+Team Combination - Enemy:
+1. Dummy
+Damage dealt: 0
+Healing done: 0
+2. blank
+Damage dealt: 0
+Healing done: 0
+3. blank
+Damage dealt: 0
+Healing done: 0
+
+=============================================================================================
+
+Match seed (randomly generated): 657831
+Result: Victory
+Type: Normal Mode
+Risk Level: 0
+Total turns: 12
+
+Team Combination - Player:
+1. Minh Phan Dong
+Damage dealt: 53360
+Healing done: 0
+2. blank
+Damage dealt: 0
+Healing done: 0
+3. blank
+Damage dealt: 0
+Healing done: 0
+
+Team Combination - Enemy:
+1. Dummy
+Damage dealt: 0
+Healing done: 0
+2. blank
+Damage dealt: 0
+Healing done: 0
+3. blank
+Damage dealt: 0
+Healing done: 0
+
+=============================================================================================
+
+Match seed (randomly generated): 478928
+Result: Victory
+Type: Normal Mode
+Risk Level: 0
+Total turns: 10
+
+Team Combination - Player:
+1. Minh Phan Dong
+Damage dealt: 55941
+Healing done: 0
+2. blank
+Damage dealt: 0
+Healing done: 0
+3. blank
+Damage dealt: 0
+Healing done: 0
+
+Team Combination - Enemy:
+1. Dummy
+Damage dealt: 0
+Healing done: 0
+2. blank
+Damage dealt: 0
+Healing done: 0
+3. blank
+Damage dealt: 0
+Healing done: 0
+
+=============================================================================================
+
+Match seed (randomly generated): 318576
+Result: Defeated
+Type: Challenge Mode
+Risk Level: 0
+Total turns: 17
+
+Team Combination - Player:
+1. Fighter
+Damage dealt: 12297
+Healing done: 0
+2. blank
+Damage dealt: 0
+Healing done: 0
+3. blank
+Damage dealt: 0
+Healing done: 0
+
+Team Combination - Enemy:
+1. The Singer
+Damage dealt: 4232
+Healing done: 0
+2. blank
+Damage dealt: 0
+Healing done: 0
+3. blank
+Damage dealt: 0
+Healing done: 0
+
+=============================================================================================
+
+Match seed (randomly generated): 194799
+Result: Defeated
+Type: Normal Mode
+Risk Level: 0
+Total turns: 5
+
+Team Combination - Player:
+1. Fighter
+Damage dealt: 1938
+Healing done: 0
+2. blank
+Damage dealt: 0
+Healing done: 0
+3. blank
+Damage dealt: 0
+Healing done: 0
+
+Team Combination - Enemy:
+1. Henry Fat
+Damage dealt: 2221
+Healing done: 0
+2. blank
+Damage dealt: 0
+Healing done: 0
+3. blank
+Damage dealt: 0
+Healing done: 0
+
+=============================================================================================

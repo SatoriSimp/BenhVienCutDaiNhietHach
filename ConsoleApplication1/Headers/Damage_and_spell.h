@@ -22,9 +22,9 @@ int lifeSteal(int damage, int vamp) { return damage * vamp / 100; }
 
 void bleedingDmg(Entities* target, Entities* caster)
 {
-	int reducedMR = target->magicRes * (100 - caster->MRpen) / 100 - 100;
+	int reducedMR = target->magicRes * (100 - minhphanMRpen) / 100;
 	if (reducedMR < 0) reducedMR = 0;
-	int damageTaken2 = damageOutput(0, reducedMR, 0, target->maxHealth * 20 / 100);
+	int damageTaken2 = damageOutput(0, reducedMR, 0, (target->maxHealth * 10 / 100) + minhphanAP);
 	if (caster->cooperSeal) damageTaken2 += damageOutput(0, target->magicRes * (100 - caster->MRpen) / 100, 0, caster->maxHealth * 8 / 100);
 	else if (caster->insult && target->health <= target->maxHealth * 5 / 10) damageTaken2 = damageTaken2 * 21 / 100;
 	else if (caster->deathmatch)
@@ -35,6 +35,7 @@ void bleedingDmg(Entities* target, Entities* caster)
 		damageTaken2 += bonusDmg;
 	}
 	if (target->fragile) damageTaken2 = damageTaken2 * 12 / 10;
+	if (target->range == -100) damageTaken2 /= 100;
 	std::cout << "\nThis ability also triggered ";
 	setColor(12);
 	std::cout << "'Bleeding'";
@@ -62,468 +63,514 @@ long runeDmg(Entities* target, Entities* caster, int damage)
 	return damage;
 }
 
-void dealingDamage(Entities* attacker, Entities* gotAttacked, bool specialForce, bool fighterWill, int playerHealth, int enemyMaxHealth, bool painSupress, bool anhquocSupremacy) {
-	if (attacker->role == "blank" || attacker->role == "Dummy") return;
-	int damageTaken = !painSupress ? damageOutput(gotAttacked->armor * (100 - attacker->ARpen) / 100, gotAttacked->magicRes * (100 - attacker->ARpen) / 100, (*attacker).attackDmg, (*attacker).abilityPower) : damageOutput(0, 0, (*attacker).attackDmg, (*attacker).abilityPower);
-
-	//Maskman talent
-	if (attacker->range == 3)
+void dealingDamage(Entities* attacker, Entities* gotAttacked) {
+	short attackTime = 1, shieldcount = 0;
+	long totalDmg = 0;
+	if (attacker->role == "Phalanx Heavyshooter")
 	{
-		int healthDifference = gotAttacked->maxHealth - attacker->maxHealth, dif_20PercentHP = attacker->maxHealth / 5;
-		int bonusDmg = healthDifference / dif_20PercentHP;
-		bonusDmg > 10 ? bonusDmg = 10 : bonusDmg < 0 ? bonusDmg = 0 : bonusDmg;
-		damageTaken += damageTaken * (bonusDmg * 10) / 100;
+		attackTime = phalanx ? 4 : 3;
 	}
-
-	//Enemy normal attack effect
-	if (attacker->range == 101 && gotAttacked->fragile) damageTaken *= 3;
-
-	if (attacker->stack > 0)
+	for (short i = 1; i <= attackTime; i++)
 	{
-		attacker->attackDmg += 160;
-		attacker->baseAD += 160;
-		attacker->stack--;
-	}
-
-	if (attacker->firstStrike)
-	{
-		if (attacker->range == 102)
+		bool preventCrit = false;
+		/*
+		if (!allySupport)
 		{
-			gotAttacked->baseAR = gotAttacked->baseAR * 6 / 10;
-			gotAttacked->armor = gotAttacked->armor * 6 / 10;
-			gotAttacked->sunBlade = 0;
-			gotAttacked->shield = 0;
-			gotAttacked->adrenaile = 0;
+			short tempOmni = 0;
+			if (attacker->absoluteFocus > 5)
+			{
+				tempOmni = 5 * (attacker->absoluteFocus - 5);
+				attacker->omniVamp += tempOmni;
+				attacker->absoluteFocus = 5;
+			}
+			attacker->attackDmg += attacker->attackDmg * 3 / 10 * attacker->absoluteFocus;
+			attacker->critUp += 15 * attacker->absoluteFocus;
+			attacker->ARpen += 7 * attacker->absoluteFocus;
 		}
-		else {
-			damageTaken = attacker->abilityPower;
-			gotAttacked->mana = 0;
-		}
-		attacker->firstStrike = false;
-	}
-	else if (attacker->role == "Senior Drawft")
-	{
-		int bonusDamage;
-		bonusDamage = !attacker->challengeMode ? (gotAttacked->maxHealth - gotAttacked->health) * 3 / 10 : (gotAttacked->maxHealth - gotAttacked->health) / 2;
-		damageTaken += damageOutput(gotAttacked->armor, 0, bonusDamage, 0);
-	}
-	else if (attacker->role == "Vengeful Spirit" && (gotAttacked->spiritMark > 0)) damageTaken += damageOutput(0, gotAttacked->magicRes, 0, gotAttacked->maxHealth * 18 / 100);
-	else if (attacker->role == "Chimera")
-	{
-		if (attacker->challengeMode) damageTaken = attacker->attackDmg + attacker->abilityPower;
-		if (attacker->divine)
+		*/
+		if (attacker->role == "blank" || attacker->role == "Dummy") return;
+		int damageTaken = damageOutput(gotAttacked->armor * (100 - attacker->ARpen) / 100, gotAttacked->magicRes * (100 - attacker->ARpen) / 100, (*attacker).attackDmg, (*attacker).abilityPower);
+		if (attacker->range == 101 && attacker->solo)
 		{
-			!(attacker->challengeMode) ? damageTaken += damageOutput(0, gotAttacked->magicRes, 0, gotAttacked->health * 16 / 100) : damageTaken += gotAttacked->health * 16 / 100;
+			const int atk_scale = (attacker->challengeMode || !attacker->turn) ? 120 : 85;
+			damageTaken = damageOutput(0, gotAttacked->magicRes / 2, 0, (attacker->attackDmg + attacker->abilityPower) * atk_scale / 100);
 		}
-	}
-	else if (attacker->range == 60)
-	{
-		setColor(LI_PURPLE);
-		!(gotAttacked->isNeutral) ? std::cout << gotAttacked->role << " is poisoned in the next 3 turns!\n", gotAttacked->poisoned = 3 : damageTaken *= 4;
-		setColor(WHITE);
-	}
-	else if (attacker->range == 151)
-	{
-		gotAttacked->baseAD -= 40, gotAttacked->attackDmg -= 40;
-		gotAttacked->baseAP -= 40, gotAttacked->abilityPower -= 40;
-		gotAttacked->baseAD <= 10 ? gotAttacked->baseAD = 10 : gotAttacked->baseAD;
-		gotAttacked->attackDmg <= 10 ? gotAttacked->attackDmg = 10 : gotAttacked->attackDmg;
-		gotAttacked->baseAP < 0 ? gotAttacked->baseAP = 0 : gotAttacked->baseAP;
-		gotAttacked->abilityPower < 0 ? gotAttacked->abilityPower = 0 : gotAttacked->abilityPower;
-	}
-	else if (attacker->range == 61 || (attacker->range == 101 && gotAttacked->health <= gotAttacked->maxHealth / 2) || (attacker->range == 101 && recollectOpStart && gotAttacked->health <= gotAttacked->maxHealth * 65 / 100))
-	{
-		attacker->range == 101 ? gotAttacked->fragile = 20 : gotAttacked->fragile = 2;
-	}
-	int criticalStrike = rand() % (100 - 0 + 1) + 1;
-	attacker->possessTalent == 8 || attacker->possessTalent2 == 8 ? criticalStrike = 100 : criticalStrike = criticalStrike;
-
-
-	if (!gotAttacked->specialForce)
-	{
-		//Crit attack
-		if (criticalStrike <= 15 + attacker->critUp && attacker->range != 8 && attacker->range != 12 && attacker->range != -1)
+		else if (attacker->range == -100 && !attacker->stack) damageTaken = gotAttacked->maxHealth / 5;
+		//Maskman talent
+		if (attacker->range == 3)
 		{
-			setColor(12);
-			printf("CRITICAL STRIKE! The damage dealt is doubled up!\n");
-			setColor(7);
-			attacker->predatorMode ? (gotAttacked->health >= gotAttacked->maxHealth / 2 ? damageTaken *= 25 / 10 : damageTaken *= 4) : damageTaken *= 2;
-			if (attacker->exploit) damageTaken += 135 + damageTaken / 10;
+			int healthDifference = gotAttacked->maxHealth - attacker->maxHealth, dif_20PercentHP = attacker->maxHealth / 5;
+			int bonusDmg = healthDifference / dif_20PercentHP;
+			bonusDmg > 10 ? bonusDmg = 10 : bonusDmg < 0 ? bonusDmg = 0 : bonusDmg;
+			damageTaken += damageTaken * (bonusDmg * 10) / 100;
 		}
 
-		if (attacker->range == 63) damageTaken += damageOutput(0, gotAttacked->magicRes, 0, (attacker->attackDmg / 2) * (attacker->shockwave));
-		//Bao Duong's attack system
-		if (attacker->sunBlade)
+		//Enemy normal attack effect
+		if (attacker->range == 101 && gotAttacked->fragile)
 		{
-			int damagePerAtk = damageOutput(gotAttacked->armor, 0, attacker->attackDmg, 0), critTime = 0, dodgeTime = 0, grazeTime = 0;
-			damageTaken = 0;
-			int attackTimes = 1 + attacker->sunBlade;
-			while (attackTimes > 0) {
-				int critical = rand() % (100 - 1 + 1) + 1;
-				attacker->possessTalent == 3 || attacker->possessTalent2 == 3 ? critical -= 20 : critical = critical;
+			damageTaken = 9999;
+			preventCrit = true;
+		}
 
-				int evasion;
-				(gotAttacked->range == 56 || gotAttacked->role == "Specialist") ? evasion = rand() % (100 - 1 + 1) + 1 : evasion = 100;
+		if (attacker->stack > 0)
+		{
+			if (attacker->range != -100)
+			{
+				attacker->attackDmg += 160;
+				attacker->baseAD += 160;
+			}
+			attacker->stack--;
+		}
 
-				gotAttacked->challengeMode ? evasion -= 30 : evasion = evasion;
+		if (attacker->firstStrike)
+		{
+			if (attacker->range == 102)
+			{
+				gotAttacked->baseAR = gotAttacked->baseAR * 6 / 10;
+				gotAttacked->armor = gotAttacked->armor * 6 / 10;
+				gotAttacked->sunBlade = 0;
+				gotAttacked->shield = 0;
+				gotAttacked->adrenaile = 0;
+			}
+			else {
+				damageTaken = attacker->abilityPower;
+				gotAttacked->mana = 0;
+			}
+			attacker->firstStrike = false;
+		}
+		else if (attacker->role == "Senior Drawft")
+		{
+			int bonusDamage;
+			bonusDamage = !attacker->challengeMode ? (gotAttacked->maxHealth - gotAttacked->health) * 3 / 10 : (gotAttacked->maxHealth - gotAttacked->health) / 2;
+			damageTaken += damageOutput(gotAttacked->armor, 0, bonusDamage, 0);
+		}
+		else if (attacker->role == "Vengeful Spirit" && (gotAttacked->spiritMark > 0)) damageTaken += damageOutput(0, gotAttacked->magicRes, 0, gotAttacked->maxHealth * 18 / 100);
+		else if (attacker->role == "Chimera")
+		{
+			if (attacker->challengeMode) damageTaken = attacker->attackDmg + attacker->abilityPower;
+			if (attacker->divine)
+			{
+				!(attacker->challengeMode) ? damageTaken += damageOutput(0, gotAttacked->magicRes, 0, gotAttacked->health * 16 / 100) : damageTaken += gotAttacked->health * 16 / 100;
+			}
+		}
+		else if (attacker->range == 60)
+		{
+			setColor(LI_PURPLE);
+			!(gotAttacked->isNeutral) ? std::cout << gotAttacked->role << " is poisoned in the next 3 turns!\n", gotAttacked->poisoned = 3 : damageTaken *= 4;
+			setColor(WHITE);
+		}
+		else if (attacker->range == 151)
+		{
+			gotAttacked->baseAD -= 40, gotAttacked->attackDmg -= 40;
+			gotAttacked->baseAP -= 40, gotAttacked->abilityPower -= 40;
+			gotAttacked->baseAD <= 10 ? gotAttacked->baseAD = 10 : gotAttacked->baseAD;
+			gotAttacked->attackDmg <= 10 ? gotAttacked->attackDmg = 10 : gotAttacked->attackDmg;
+			gotAttacked->baseAP < 0 ? gotAttacked->baseAP = 0 : gotAttacked->baseAP;
+			gotAttacked->abilityPower < 0 ? gotAttacked->abilityPower = 0 : gotAttacked->abilityPower;
+		}
+		else if (attacker->range == 61 || (attacker->range == 101 && gotAttacked->health <= gotAttacked->maxHealth / 2))
+		{
+			attacker->range == 101 ? gotAttacked->fragile = 20 : gotAttacked->fragile = 2;
+		}
+		int criticalStrike = rand() % (100 - 0 + 1) + 1;
+		attacker->possessTalent == 8 || attacker->possessTalent2 == 8 ? criticalStrike = 100 : criticalStrike = criticalStrike;
 
-				damageTaken += damagePerAtk;
 
-				if (critical <= 15 + attacker->sunBlade * 7 + attacker->critUp)
+		if (!gotAttacked->specialForce)
+		{
+			//Crit attack
+			if (!preventCrit && criticalStrike <= 15 + attacker->critUp && attacker->range != 8 && attacker->range != 12 && attacker->range != -1)
+			{
+				if (attacker->range != 68)
 				{
+					setColor(12);
+					printf("CRITICAL STRIKE! The damage dealt is doubled up!\n");
+					setColor(7);
+				}
+				attacker->predatorMode ? (gotAttacked->health >= gotAttacked->maxHealth / 2 ? damageTaken *= 25 / 10 : damageTaken *= 4) : damageTaken *= 2;
+				if (attacker->exploit) damageTaken += 135 + damageTaken / 10;
+			}
+
+			if (attacker->range == 63) damageTaken += damageOutput(0, gotAttacked->magicRes, 0, (attacker->attackDmg / 2) * (attacker->shockwave));
+			//Bao Duong's attack system
+			if (attacker->sunBlade)
+			{
+				int damagePerAtk = damageOutput(gotAttacked->armor, 0, attacker->attackDmg, 0), critTime = 0, dodgeTime = 0, grazeTime = 0;
+				damageTaken = 0;
+				int attackTimes = 1 + attacker->sunBlade;
+				while (attackTimes > 0) {
+					int critical = rand() % (100 - 1 + 1) + 1;
+					attacker->possessTalent == 3 || attacker->possessTalent2 == 3 ? critical -= 20 : critical = critical;
+
+					int evasion;
+					(gotAttacked->range == 56 || gotAttacked->role == "Specialist") ? evasion = rand() % (100 - 1 + 1) + 1 : evasion = 100;
+
+					gotAttacked->challengeMode ? evasion -= 30 : evasion = evasion;
+
 					damageTaken += damagePerAtk;
-					critTime++;
+
+					if (critical <= 15 + attacker->sunBlade * 7 + attacker->critUp)
+					{
+						damageTaken += damagePerAtk;
+						critTime++;
+					}
+
+					if (evasion <= 20)
+					{
+						critical > 15 + attacker->sunBlade * 7 ? damageTaken -= damagePerAtk : damageTaken -= damagePerAtk * 2;
+						dodgeTime++;
+					}
+					else if (evasion <= 50)
+					{
+						critical > 15 + attacker->sunBlade * 7 ? damageTaken -= damagePerAtk / 2 : damageTaken -= damagePerAtk;
+						grazeTime++;
+					}
+
+					attackTimes--;
 				}
 
-				if (evasion <= 20)
+				if (attacker->omniVamp >= 40) damageTaken += damageOutput(0, gotAttacked->magicRes * (100 - attacker->MRpen) / 100, 0, gotAttacked->maxHealth / 10);
+				if (attacker->exploit) damageTaken += 135 + damagePerAtk / 5;
+
+				if (attacker->isPlayer) std::cout << attacker->role << " stroke the enemy ";
+				else
 				{
-					critical > 15 + attacker->sunBlade * 7 ? damageTaken -= damagePerAtk : damageTaken -= damagePerAtk * 2;
-					dodgeTime++;
+					setColor(14);  std::cout << attacker->role;
+					setColor(7);   std::cout << " stroke " << gotAttacked->role << "'s ass ";
+				}
+				setColor(12);
+				attacker->sunBlade != 0 ? std::cout << 1 + attacker->sunBlade << " times" : std::cout << "1 time";
+				setColor(7);
+				std::cout << " and did ";
+				setColor(12);
+				std::cout << critTime << " critical attacks!\n";
+				setColor(7);
+
+				if (gotAttacked->role == "Senior Drawft" || gotAttacked->role == "Specialist")
+				{
+					setColor(14);
+					std::cout << gotAttacked->role;
+					setColor(7);
+					std::cout << " dodged ";
+					setColor(14); std::cout << attacker->role;
+					setColor(7); std::cout << "'s attacks ";
+
+					setColor(10);
+					dodgeTime > 1 ? std::cout << dodgeTime << " times" : std::cout << dodgeTime << " time";
+					setColor(7);
+					std::cout << " and grazed ";
+					setColor(10);
+					grazeTime > 1 ? std::cout << grazeTime << " times\n" : std::cout << grazeTime << " time!\n";
+					setColor(7);
+				}
+			}
+
+			damageTaken = runeDmg(gotAttacked, attacker, damageTaken);
+
+			//Specialist & Senior Drawft dodge system
+			if (((*gotAttacked).role == "Specialist" || gotAttacked->role == "Senior Drawft") && attacker->range != 8)
+			{
+				int evasion = rand() % (100 - 1 + 1) + 1;
+				if (gotAttacked->role == "Senior Drawft") evasion = rand() % (70 - 1 + 1) + 1;
+				gotAttacked->challengeMode ? evasion -= 15 : evasion;
+
+				if (evasion <= 20 || (*gotAttacked).readytoDodge)
+				{
+					damageTaken = 0;
+					setColor(10);
+					gotAttacked->isPlayer ? std::cout << "DODGED! You take no damage this round! " : std::cout << "DODGED! " << gotAttacked->role << " takes no damage this round! ";
+					setColor(7);
+					(*gotAttacked).readytoDodge = false;
 				}
 				else if (evasion <= 50)
 				{
-					critical > 15 + attacker->sunBlade * 7 ? damageTaken -= damagePerAtk / 2 : damageTaken -= damagePerAtk;
-					grazeTime++;
+					damageTaken /= 2;
+					setColor(10);
+					gotAttacked->isPlayer ? std::cout << "GRAZED! You take half damage this round! " : std::cout << "GRAZED! " << gotAttacked->role << " takes half damage this round! ";
+					setColor(7);
 				}
-
-				attackTimes--;
 			}
 
-			if (attacker->omniVamp >= 40) damageTaken += damageOutput(0, gotAttacked->magicRes * (100 - attacker->MRpen) / 100, 0, enemyMaxHealth / 10);
-			if (attacker->exploit) damageTaken += 135 + damagePerAtk / 5;
-
-			if (attacker->isPlayer) std::cout << attacker->role << " stroke the enemy ";
-			else
+			//Anh Quoc's talent
+			if (attacker->role == "Anh Quoc" || attacker->possessTalent == 6 || attacker->possessTalent2 == 6)
 			{
-				setColor(14);  std::cout << attacker->role;
-				setColor(7);   std::cout << " stroke " << gotAttacked->role << "'s ass ";
-			}
-			setColor(12);
-			attacker->sunBlade != 0 ? std::cout << 1 + attacker->sunBlade << " times" : std::cout << "1 time";
-			setColor(7);
-			std::cout << " and did ";
-			setColor(12);
-			std::cout << critTime << " critical attacks!\n";
-			setColor(7);
+				int randomBuff = rand() % (3 - 1 + 1) + 1;
+				switch (randomBuff)
+				{
+				case 1:
+					if (criticalStrike <= 15) printf("But this unit damage is already massive so it won't be increased! ");
+					setColor(13);
+					if (attacker->isPlayer) std::cout << attacker->role << "'s attack deals true damage and can not be dodged nor grazed!\n";
+					else
+					{
+						setColor(14);
+						std::cout << attacker->role;
+						setColor(13);
+						std::cout << " deals increased true damage!\n";
+					}
+					setColor(7);
+					attacker->isPlayer ? damageTaken = damageOutput(0, 0, (*attacker).attackDmg * 2, 0) : damageTaken = damageOutput(0, 0, (*attacker).attackDmg * 15 / 10, 0);
+					break;
+				case 2:
+					if (criticalStrike > 15)
+					{
+						if (attacker->isPlayer) std::cout << attacker->role << " are healed for ";
+						else {
+							setColor(14);
+							std::cout << attacker->role;
+							setColor(7);
+							std::cout << " is healed for ";
+						}
+						setColor(2);
+						int CopyHeal = attacker->maxHealth * 7 / 100;
+						if (attacker->isPlayer) CopyHeal = attacker->maxHealth * 15 / 100;
+						if (attacker->poisoned) CopyHeal = CopyHeal * 4 / 10;
+						if (attacker->healingBanned) CopyHeal = 0;
+						std::cout << CopyHeal << " HP!\n";
+						setColor(7);
+						(*attacker).health + CopyHeal > attacker->maxHealth ? (*attacker).health = attacker->maxHealth : (*attacker).health += CopyHeal;
+					}
+					else
+					{
+						if (attacker->isPlayer) std::cout << attacker->role << " is double-healed for ";
+						else {
+							setColor(14);
+							std::cout << attacker->role;
+							setColor(7);
+							std::cout << " is double-healed for ";
+						}
+						setColor(2);
+						int CopyHeal = attacker->maxHealth * 15 / 100;
+						if (attacker->isPlayer) CopyHeal = attacker->maxHealth * 3 / 10;
+						if (attacker->poisoned) CopyHeal = CopyHeal * 4 / 10;
+						if (attacker->healingBanned) CopyHeal = 0;
+						std::cout << CopyHeal << " HP!\n";
+						setColor(7);
 
-			if (gotAttacked->role == "Senior Drawft" || gotAttacked->role == "Specialist")
+						(*attacker).health + CopyHeal > attacker->maxHealth ? (*attacker).health = attacker->maxHealth : (*attacker).health += CopyHeal;
+					}
+					break;
+				case 3:
+					if (attacker->isPlayer)
+					{
+						setColor(11);
+						std::cout << attacker->role << " receives 1 bonus mana!\n";
+						setColor(7);
+						(*attacker).mana++;
+					}
+					else {
+						setColor(14);
+						std::cout << attacker->role;
+						setColor(11);
+						std::cout << " took 1 mana from " << gotAttacked->role << "\n";
+						gotAttacked->mana--;
+						gotAttacked->mana < 0 ? gotAttacked->mana = 0 : gotAttacked->mana;
+						setColor(7);
+					}
+					break;
+				}
+			}
+
+			if (gotAttacked->fragile > 0 && attacker->range != 101)
 			{
-				setColor(14);
-				std::cout << gotAttacked->role;
-				setColor(7);
-				std::cout << " dodged ";
-				setColor(14); std::cout << attacker->role;
-				setColor(7); std::cout << "'s attacks ";
-
-				setColor(10);
-				dodgeTime > 1 ? std::cout << dodgeTime << " times" : std::cout << dodgeTime << " time";
-				setColor(7);
-				std::cout << " and grazed ";
-				setColor(10);
-				grazeTime > 1 ? std::cout << grazeTime << " times\n" : std::cout << grazeTime << " time!\n";
-				setColor(7);
+				damageTaken = gotAttacked->isPlayer ? damageTaken * 12 / 10 : damageTaken * 14 / 10;
 			}
-		}
 
-		damageTaken = runeDmg(gotAttacked, attacker, damageTaken);
+			//AlterVinh talent
+			if (attacker->range == 12 && damageTaken < (attacker->abilityPower + attacker->attackDmg) / 2) damageTaken = (attacker->abilityPower + attacker->attackDmg) / 2;
 
-		//Specialist & Senior Drawft dodge system
-		if (((*gotAttacked).role == "Specialist" || gotAttacked->role == "Senior Drawft") && attacker->range != 8)
-		{
-			int evasion = rand() % (100 - 1 + 1) + 1;
-			if (gotAttacked->role == "Senior Drawft") evasion = rand() % (70 - 1 + 1) + 1;
-			gotAttacked->challengeMode ? evasion -= 15 : evasion;
-
-			if (evasion <= 20 || (*gotAttacked).readytoDodge)
+			//Phong Vinh's shield
+			if (gotAttacked->shield > 0)
 			{
 				damageTaken = 0;
-				setColor(10);
-				gotAttacked->isPlayer ? std::cout << "DODGED! You take no damage this round! " : std::cout << "DODGED! " << gotAttacked->role << " takes no damage this round! ";
-				setColor(7);
-				(*gotAttacked).readytoDodge = false;
-			}
-			else if (evasion <= 50)
-			{
-				damageTaken /= 2;
-				setColor(10);
-				gotAttacked->isPlayer ? std::cout << "GRAZED! You take half damage this round! " : std::cout << "GRAZED! " << gotAttacked->role << " takes half damage this round! ";
-				setColor(7);
-			}
-		}
-
-		//if ((*attacker).role == "Zombified Orc") healing += playerHealth * 7 / 100;
-
-		//Caster's skill 2
-		(painSupress || gotAttacked->antiDeath) ? damageTaken *= 2 : damageTaken;
-
-		//Anh Quoc's talent
-		if (attacker->role == "Anh Quoc" || attacker->possessTalent == 6 || attacker->possessTalent2 == 6)
-		{
-			int randomBuff = rand() % (3 - 1 + 1) + 1;
-			switch (randomBuff)
-			{
-			case 1:
-				if (criticalStrike <= 15) printf("But this unit damage is already massive so it won't be increased! ");
-				setColor(13);
-				if (attacker->isPlayer) std::cout << attacker->role << "'s attack deals true damage and can not be dodged nor grazed!\n";
-				else
+				int restore = gotAttacked->isPlayer ? gotAttacked->maxHealth / 5 : gotAttacked->maxHealth / 10;
+				if (gotAttacked->poisoned > 0) restore = restore * 4 / 10;
+				if (gotAttacked->healingBanned) restore = 0;
+				if (attacker->range == 68)
 				{
-					setColor(14);
-					std::cout << attacker->role;
-					setColor(13);
-					std::cout << " deals increased true damage!\n";
-				}
-				setColor(7);
-				attacker->isPlayer ? damageTaken = damageOutput(0, 0, (*attacker).attackDmg * 2, 0) : damageTaken = damageOutput(0, 0, (*attacker).attackDmg * 15 / 10, 0);
-				break;
-			case 2:
-				if (criticalStrike > 15)
-				{
-					if (attacker->isPlayer) std::cout << attacker->role << " are healed for ";
-					else {
-						setColor(14);
-						std::cout << attacker->role;
-						setColor(7);
-						std::cout << " is healed for ";
-					}
-					setColor(2);
-					int CopyHeal = attacker->maxHealth * 7 / 100;
-					if (attacker->isPlayer) CopyHeal = attacker->maxHealth * 15 / 100;
-					if (attacker->poisoned) CopyHeal = CopyHeal * 4 / 10;
-					if (attacker->healingBanned) CopyHeal = 0;
-					std::cout << CopyHeal << " HP!\n";
-					setColor(7);
-					(*attacker).health + CopyHeal > attacker->maxHealth ? (*attacker).health = attacker->maxHealth : (*attacker).health += CopyHeal;
+					shieldcount++;
 				}
 				else
 				{
-					if (attacker->isPlayer) std::cout << attacker->role << " is double-healed for ";
-					else {
-						setColor(14);
-						std::cout << attacker->role;
-						setColor(7);
-						std::cout << " is double-healed for ";
-					}
+					std::cout << "This damage is blocked, " << gotAttacked->role << " restores ";
 					setColor(2);
-					int CopyHeal = attacker->maxHealth * 15 / 100;
-					if (attacker->isPlayer) CopyHeal = attacker->maxHealth * 3 / 10;
-					if (attacker->poisoned) CopyHeal = CopyHeal * 4 / 10;
-					if (attacker->healingBanned) CopyHeal = 0;
-					std::cout << CopyHeal << " HP!\n";
-					setColor(7);
-
-					(*attacker).health + CopyHeal > attacker->maxHealth ? (*attacker).health = attacker->maxHealth : (*attacker).health += CopyHeal;
-				}
-				break;
-			case 3:
-				if (attacker->isPlayer)
-				{
-					setColor(11);
-					std::cout << attacker->role << " receives 1 bonus mana!\n";
-					setColor(7);
-					(*attacker).mana++;
-				}
-				else {
-					setColor(14);
-					std::cout << attacker->role;
-					setColor(11);
-					std::cout << " took 1 mana from " << gotAttacked->role << "\n";
-					gotAttacked->mana--;
-					gotAttacked->mana < 0 ? gotAttacked->mana = 0 : gotAttacked->mana;
+					std::cout << restore << " health!\n";
 					setColor(7);
 				}
-				break;
+				gotAttacked->health + restore <= gotAttacked->maxHealth ? gotAttacked->health += restore : gotAttacked->health = gotAttacked->maxHealth;
+				gotAttacked->shield--;
 			}
-		}
 
-		if (gotAttacked->fragile > 0) damageTaken = gotAttacked->isPlayer ? damageTaken * 12 / 10 : damageTaken * 14 / 10;
-
-		//AlterVinh talent
-		if (attacker->range == 12 && damageTaken < (attacker->abilityPower + attacker->attackDmg) / 2) damageTaken = (attacker->abilityPower + attacker->attackDmg) / 2;
-
-		// Anh Quoc's skill 2
-		if ((anhquocSupremacy || gotAttacked->anhquoc) && (*attacker).isEnemy)
-		{
-			int weirdFlex = rand() % (8 - 3 + 1) + 3;
-			if ((*gotAttacked).health > (1888 / 2))
+			//Fighter's skill 2
+			if (gotAttacked->fighter && !(attacker->range == 101 && attacker->solo) && !(attacker->range == 101 && gotAttacked->fragile))
 			{
+				(*attacker).isEnemy ? damageTaken /= 10 : damageTaken /= 2;
+			}
+			if (gotAttacked->range == -100) damageTaken /= 100;
+
+			//Life steal
+			int healing = lifeSteal(damageTaken, (*attacker).omniVamp);
+			if (attacker->poisoned > 0) healing = healing * 4 / 10;
+
+			//Minh phan's bleeding effect & talent
+			if ((*gotAttacked).bleeding) bleedingDmg(gotAttacked, attacker);
+
+			if ((gotAttacked->range == 7 || gotAttacked->possessTalent == 7 || gotAttacked->possessTalent2 == 7) && !(attacker->solo && attacker->range == 101) && !(attacker->range == 101 && gotAttacked->fragile)) 
 				damageTaken = damageTaken * 8 / 10;
-			}
-			else
+
+			//Damage dealt
+			(*gotAttacked).health -= damageTaken;
+			if (attacker->range == 67)
 			{
-				damageTaken = damageTaken * (8 - weirdFlex) / 10;
-				std::cout << gotAttacked->role << "'s damage taken this turn is reduced by ";
-				setColor(12);
-				std::cout << (10 - 8 + weirdFlex) * 10 << "%\n";
+				gotAttacked->maxHealth -= damageTaken;
+				if (gotAttacked->maxHealth < 100) gotAttacked->maxHealth = 100;
+			}
+
+			// Emperors' Blade passive
+			if (attacker->role == "Emperors' Blade - The Pursuer" && gotAttacked->health < gotAttacked->maxHealth / 2) gotAttacked->fragile = 10;
+
+			//Minh Phan's passive
+			if ((*attacker).healingBanned) healing = 0;
+
+			//If the healing went beyond unit's max health, it's set to their max health
+			attacker->health + healing > attacker->maxHealth ? attacker->health = attacker->maxHealth : attacker->health += healing;
+
+			//Send damage output
+			if (attacker->range != 68)
+			{
+				if ((*attacker).isPlayer && (attacker->attackDmg > 0 || attacker->abilityPower > 0))
+				{
+					std::cout << attacker->role << " dealt to ";
+					setColor(14);
+					std::cout << (*gotAttacked).role << " ";
+					setColor(7);
+					if (attacker->abilityPower > attacker->attackDmg) { setColor(5); }
+					else { setColor(12); }
+					std::cout << damageTaken << " damage!\n";
+					setColor(7);
+				}
+				else if (damageTaken > 0)
+				{
+					setColor(14);
+					std::cout << (*attacker).role;
+					setColor(7);
+					std::cout << " dealt to " << gotAttacked->role << ' ';
+					if (attacker->abilityPower > attacker->attackDmg) { setColor(5); }
+					else { setColor(12); }
+					std::cout << damageTaken << " damage!\n";
+					setColor(7);
+				}
+			}
+			else totalDmg += damageTaken;
+
+			//Specialist skill 2 activation
+			if ((*gotAttacked).emergencyOn && (*gotAttacked).health < 0)
+			{
+				(*gotAttacked).health = 1000;
+				(*gotAttacked).emergencyOn = false;
+				setColor(11);
+				if (gotAttacked->isPlayer)
+				{
+					std::cout << "The switch is on! You are healed for ";
+					setColor(2);
+					std::cout << 1000 + damageTaken << " HP ";
+					setColor(11);
+					std::cout << "and gains ";
+					setColor(14);
+					std::cout << "100% dodge";
+					setColor(11);
+					std::cout << " in the next turn!\n";
+				}
+				else
+				{
+					std::cout << "The switch is broken! " << gotAttacked->role << " is healed for ";
+					setColor(2);
+					std::cout << 1000 + damageTaken << " HP!\n";
+				}
+				setColor(7);
+				(*gotAttacked).health += damageTaken;
+				(*gotAttacked).mana += 3;
+				(*gotAttacked).readytoDodge = true;
+				gotAttacked->healingDone += damageTaken + 1000;
+			}
+
+			//Healing notification
+			if ((*attacker).isPlayer && (*attacker).omniVamp > 0)
+			{
+				std::cout << "You also healed for ";
+				setColor(2);
+				std::cout << healing << " HP!\n";
 				setColor(7);
 			}
-			gotAttacked->anhquoc = false;
-		}
-
-		//Phong Vinh's shield
-		if (gotAttacked->shield > 0)
-		{
-			damageTaken = 0;
-			int restore = gotAttacked->isPlayer ? gotAttacked->maxHealth / 5 : gotAttacked->maxHealth / 10;
-			if (gotAttacked->poisoned > 0) restore = restore * 4 / 10;
-			if (gotAttacked->healingBanned) restore = 0;
-			std::cout << "This damage is blocked, " << gotAttacked->role << " restores ";
-			setColor(2);
-			std::cout << restore << " health!\n";
-			setColor(7);
-			gotAttacked->health + restore <= gotAttacked->maxHealth ? gotAttacked->health += restore : gotAttacked->health = gotAttacked->maxHealth;
-			gotAttacked->shield--;
-		}
-
-		//Life steal
-		int healing = lifeSteal(damageTaken, (*attacker).omniVamp);
-		if (attacker->poisoned > 0) healing = healing * 4 / 10;
-
-		//Minh phan's bleeding effect & talent
-		if ((*gotAttacked).bleeding) bleedingDmg(gotAttacked, attacker);
-
-		if (gotAttacked->range == 7 || gotAttacked->possessTalent == 7 || gotAttacked->possessTalent2 == 7) damageTaken = damageTaken * 8 / 10;
-
-		//Fighter's skill 2
-		if (fighterWill || gotAttacked->fighter)
-		{
-			(*attacker).isEnemy ? damageTaken /= 10 : damageTaken /= 2;
-		}
-
-		//Damage dealt
-		(*gotAttacked).health -= damageTaken;
-
-		if ((attacker->role == "Emperors' Blade - The Pursuer" && gotAttacked->health < gotAttacked->maxHealth / 2) || (attacker->role == "Emperors' Blade - The Pursuer" && recollectOpStart && gotAttacked->health <= gotAttacked->maxHealth * 65 / 100)) gotAttacked->fragile = 10;
-
-		//Minh Phan's passive
-		if ((*attacker).healingBanned) healing = 0;
-
-		//If the healing went beyond unit's max health, it's set to their max health
-		if ((*attacker).isPlayer) (*attacker).health = ((*attacker).health + healing > attacker->maxHealth ? attacker->maxHealth : (*attacker).health + healing);
-		else (*attacker).health = (*attacker).health + healing > enemyMaxHealth ? enemyMaxHealth : (*attacker).health + healing;
-
-		//Send damage output
-		if ((*attacker).isPlayer && (attacker->attackDmg > 0 || attacker->abilityPower > 0))
-		{
-			std::cout << attacker->role << " dealt to ";
-			setColor(14);
-			std::cout << (*gotAttacked).role << " ";
-			setColor(7);
-			if (attacker->abilityPower > attacker->attackDmg) { setColor(5); }
-			else { setColor(12); }
-			std::cout << damageTaken << " damage!\n";
-			setColor(7);
-		}
-		else if (damageTaken > 0)
-		{
-			setColor(14);
-			std::cout << (*attacker).role;
-			setColor(7);
-			std::cout << " dealt to " << gotAttacked->role << ' ';
-			if (attacker->abilityPower > attacker->attackDmg) { setColor(5); }
-			else { setColor(12); }
-			std::cout << damageTaken << " damage!\n";
-			setColor(7);
-		}
-
-		//Caster skill 2 activation
-		if (painSupress || gotAttacked->antiDeath)
-		{
-			(*gotAttacked).health < 1 ? (*gotAttacked).health = 1 : (*gotAttacked).health;
-			int manaBuff = 6 + damageTaken / 75;
-			std::cout << "Due to the damage taken, you receive ";
-			setColor(11);
-			std::cout << manaBuff << " mana!\n";
-			setColor(7);
-			(*gotAttacked).mana += manaBuff;
-			(*gotAttacked).genesisUsed = true;
-		}
-
-		//Specialist skill 2 activation
-		if ((*gotAttacked).emergencyOn && (*gotAttacked).health < 0)
-		{
-			(*gotAttacked).health = 1000;
-			(*gotAttacked).emergencyOn = false;
-			setColor(11);
-			if (gotAttacked->isPlayer)
+			else if (!(*attacker).isPlayer && (*attacker).omniVamp > 0)
 			{
-				std::cout << "The switch is on! You are healed for ";
-				setColor(2);
-				std::cout << 1000 + damageTaken << " HP ";
-				setColor(11);
-				std::cout << "and gains ";
 				setColor(14);
-				std::cout << "100% dodge";
-				setColor(11);
-				std::cout << " in the next turn!\n";
-			}
-			else
-			{
-				std::cout << "The switch is broken! " << gotAttacked->role << " is healed for ";
+				std::cout << (*attacker).role;
+				setColor(7);
+				std::cout << " also healed themself for ";
 				setColor(2);
-				std::cout << 1000 + damageTaken << " HP!\n";
+				std::cout << healing << " HP!\n";
+				setColor(7);
 			}
-			setColor(7);
-			(*gotAttacked).health += damageTaken;
-			(*gotAttacked).mana += 3;
-			(*gotAttacked).readytoDodge = true;
-			gotAttacked->healingDone += damageTaken + 1000;
-		}
 
-		//Healing notification
-		if ((*attacker).isPlayer && (*attacker).omniVamp > 0)
+			//Defender's talent
+			if (gotAttacked->role == "Defender" || gotAttacked->possessTalent == 2 || gotAttacked->possessTalent2 == 2)
+			{
+				int damageReflect = damageOutput(0, attacker->magicRes, 0, 120 + (gotAttacked->armor * 6 / 10) + (gotAttacked->magicRes * 6 / 10));
+				damageReflect = runeDmg(attacker, gotAttacked, damageReflect);
+				if (attacker->fragile) damageReflect = damageReflect * 12 / 10;
+				if (attacker->range == -100) damageReflect /= 100;
+				attacker->health -= damageReflect;
+				if (attackTime == 1)
+				{
+					std::cout << gotAttacked->role << " reflected to " << attacker->role << " ";
+					setColor(5);
+					std::cout << damageReflect << " damage!\n";
+					setColor(7);
+				}
+				gotAttacked->damageDealt += damageReflect;
+			}
+
+			attacker->damageDealt += damageTaken;
+			attacker->healingDone += healing;
+		}
+		//Specialist's skill 1
+		else
 		{
-			std::cout << "You also healed for ";
+			if (criticalStrike <= 15 || (criticalStrike <= 50 && attacker->predatorMode))
+			{
+				attacker->predatorMode && (gotAttacked->health < gotAttacked->maxHealth / 2) ? damageTaken *= 4 : attacker->predatorMode ? damageTaken *= 25 / 10 : damageTaken *= 2;
+				setColor(10);
+				std::cout << "CRITICAL STRIKE! " << gotAttacked->role << "'s healed as twice as normal, how cheat!\n";
+				setColor(7);
+			}
+			damageTaken = damageTaken * 7 / 10;
+			if (gotAttacked->poisoned > 0) damageTaken = damageTaken * 4 / 10;
+			(*gotAttacked).health + damageTaken < gotAttacked->maxHealth ? (*gotAttacked).health += damageTaken : (*gotAttacked).health = gotAttacked->maxHealth;
+			std::cout << (*attacker).role << " tried to attack " << gotAttacked->role << ", but their attack has been adsorbed and instead heal ";
 			setColor(2);
-			std::cout << healing << " HP!\n";
+			std::cout << damageTaken << " HP!\n";
 			setColor(7);
+			gotAttacked->specialForce = false;
+			gotAttacked->healingDone += damageTaken;
 		}
-		else if (!(*attacker).isPlayer && (*attacker).omniVamp > 0)
-		{
-			setColor(14);
-			std::cout << (*attacker).role;
-			setColor(7);
-			std::cout << " also healed themself for ";
-			setColor(2);
-			std::cout << healing << " HP!\n";
-			setColor(7);
-		}
-
-		//Defender's talent
-		if (gotAttacked->role == "Defender" || gotAttacked->possessTalent == 2 || gotAttacked->possessTalent2 == 2)
-		{
-			int damageReflect = damageOutput(0, attacker->magicRes, 0, 30 + gotAttacked->armor / 4 + gotAttacked->magicRes / 4);
-			damageReflect = runeDmg(attacker, gotAttacked, damageReflect);
-			(*attacker).health -= damageReflect;
-			std::cout << gotAttacked->role << " reflected to " << (*attacker).role << " ";
-			setColor(5);
-			std::cout << damageReflect << " damage!\n";
-			setColor(7);
-			gotAttacked->damageDealt += damageReflect;
-		}
-
-		attacker->damageDealt += damageTaken;
-		attacker->healingDone += healing;
 	}
-	//Specialist's skill 1
-	else
+	if (attacker->range == 68)
 	{
-		if (criticalStrike <= 15 || (criticalStrike <= 50 && attacker->predatorMode))
-		{
-			attacker->predatorMode && (gotAttacked->health < gotAttacked->maxHealth / 2) ? damageTaken *= 4 : attacker->predatorMode ? damageTaken *= 25 / 10 : damageTaken *= 2;
-			setColor(10);
-			std::cout << "CRITICAL STRIKE! " << gotAttacked->role << "'s healed as twice as normal, how cheat!\n";
-			setColor(7);
-		}
-		damageTaken = damageTaken * 7 / 10;
-		if (gotAttacked->poisoned > 0) damageTaken = damageTaken * 4 / 10;
-		(*gotAttacked).health + damageTaken < gotAttacked->maxHealth ? (*gotAttacked).health += damageTaken : (*gotAttacked).health = gotAttacked->maxHealth;
-		std::cout << (*attacker).role << " tried to attack " << gotAttacked->role << ", but their attack has been adsorbed and instead heal ";
-		setColor(2);
-		std::cout << damageTaken << " HP!\n";
+		setColor(LI_YELLOW);
+		std::cout << attacker->role;
 		setColor(7);
-		gotAttacked->specialForce = false;
-		gotAttacked->healingDone += damageTaken;
+		std::cout << " attacked ", setColor(14);
+		std::cout << gotAttacked->role, setColor(7);
+		std::cout << " for a total of ", setColor(RED);
+		std::cout << totalDmg << " damage!";
+		if (shieldcount > 0)
+		{
+			setColor(LI_GREEN);
+			std::cout << " (" << shieldcount << " of the attacks was blocked!)";
+		}
+		std::cout << '\n';
+		setColor(7);
 	}
 }
 
@@ -573,6 +620,7 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 			target->health > target->maxHealth ? target->health = target->maxHealth : target->health = target->health;
 		}
 
+		if (target->range == -100) damageTaken /= 100;
 		(*target).health -= damageTaken;
 		std::cout << caster->role << " dealt ";
 		setColor(12);
@@ -592,7 +640,7 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 	}
 	case 3:
 	{
-		//Next attack deals 180% damage and guarantee a crit, ignore 25% armor. Then briefly gains 15% lifesteal
+		//Next attack deals 180% damage and guarantee a crit, ignore 25% armor. Biefly benefits from 15% lifesteal
 		damageTaken = damageOutput((target->armor * (100 - caster->ARpen) / 100) * 3 / 4, 0, ((*caster).attackDmg * 18 / 10) * 2, 0);
 
 		//Maskman talent: Every 20% difference max health increases damage output by 10% (cap at 100%)
@@ -641,6 +689,7 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 
 		int heal = damageTaken * 15 / 100 + 50 + lifeSteal(damageTaken, (*caster).omniVamp);
 		if (caster->poisoned > 0) heal = heal * 4 / 10;
+		if (target->range == -100) damageTaken /= 100;
 
 		(*target).health -= damageTaken;
 		(*caster).health += heal;
@@ -660,16 +709,17 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 	case 4:
 	{
 		//consume all mana
-		//deals 200% ap as true dmg
-		//every mana spent increases dmg by 65 + 35%
+		//deals 200% ap 
+		//every mana spent increases dmg by 80 + 40%
 		//benefits from runes and other eff
+		//deals magic dmg, 30% of the total dmg is treated as true dmg
 		caster->mana += 3;
 		damageTaken = caster->abilityPower * 2;
 		int Sto = damageTaken;
 		short manaConsumed = 0;
 		while (caster->mana > 0)
 		{
-			if (manaConsumed >= 3) damageTaken += 80 + Sto * 42 / 100;
+			if (manaConsumed >= 3) damageTaken += 80 + Sto * 45 / 100;
 			caster->mana--;
 			manaConsumed++;
 		}
@@ -710,7 +760,12 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 			target->health > target->maxHealth ? target->health = target->maxHealth : target->health = target->health;
 		}
 
-		(*target).health -= damageTaken;
+		int magicdmgTaken = damageTaken * 7 / 10,
+			truedmgTaken = damageTaken - magicdmgTaken;
+		
+		damageTaken = damageOutput(0, target->magicRes * (100 - caster->MRpen) / 100, 0, magicdmgTaken) + truedmgTaken;
+		if (target->range == -100) damageTaken /= 100;
+		target->health -= damageTaken;
 		std::cout << caster->role << " consumed all mana to deal ";
 		setColor(11);
 		std::cout << damageTaken << " true damage!\n";
@@ -721,11 +776,11 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 	case 5:
 	{
 		/*
-		Sacrifice 25% current HP to deal the exact amount of true damage (no lower than 100)
+		Sacrifice 30% current HP to deal the exact amount of true damage (no lower than 100)
 		For exchange, gain 100% evasion and heal for 70% damage taken next turn
 		*/
-		int healthSac = (*caster).health * 3 / 10;
-		(*caster).health -= healthSac;
+		int healthSac = caster->health * 3 / 10;
+		caster->health -= healthSac;
 		damageTaken = healthSac;
 
 		if (caster->cooperSeal) damageTaken += damageOutput(0, target->magicRes * (100 - caster->MRpen) / 100, 0, caster->maxHealth * 8 / 100);
@@ -774,7 +829,7 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 			target->health += shieldHeal;
 			target->health > target->maxHealth ? target->health = target->maxHealth : target->health = target->health;
 		}
-
+		if (target->range == -100) damageTaken /= 100;
 		(*target).health -= damageTaken;
 		std::cout << "\n" << caster->role << " sacrificed ";
 		setColor(2);
@@ -839,7 +894,7 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 				target->health += shieldHeal;
 				target->health > target->maxHealth ? target->health = target->maxHealth : target->health = target->health;
 			}
-
+			if (target->range == -100) damageTaken /= 100;
 			(*target).health -= damageTaken;
 			setColor(4);
 			std::cout << "\nPOWER OVERWHELMED! ";
@@ -886,14 +941,11 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 			}
 			if (target->fragile > 0) damageTaken2 = damageTaken2 * 12 / 10;
 			bodySlam *= 3;
-			std::cout << "\nThis ability also triggered ";
-			setColor(12);
-			std::cout << "'Bleeding'";
-			setColor(7);
-			std::cout << " effect, deals an additional ";
-			setColor(5);
-			std::cout << damageTaken2 << " damage!\n";
-			setColor(7);
+			if (target->range == -100)
+			{
+				damageTaken2 /= 100;
+				bodySlam /= 100;
+			}
 			if (target->shield > 0)
 			{
 				damageTaken2 = 0;
@@ -907,6 +959,15 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 				target->health += shieldHeal;
 				target->health > target->maxHealth ? target->health = target->maxHealth : target->health = target->health;
 			}
+
+			std::cout << "\nThis ability also triggered ";
+			setColor(12);
+			std::cout << "'Bleeding'";
+			setColor(7);
+			std::cout << " effect, deals an additional ";
+			setColor(5);
+			std::cout << damageTaken2 << " damage!\n";
+			setColor(7);
 			target->health -= damageTaken2;
 			target->bleeding = false;
 		}
@@ -948,7 +1009,7 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 			target->health += shieldHeal;
 			target->health > target->maxHealth ? target->health = target->maxHealth : target->health = target->health;
 		}
-
+		if (target->range == -100) damageTaken /= 100;
 		std::cout << damage;
 		setColor(5);
 		std::cout << damageTaken << " damage!\n";
@@ -964,7 +1025,7 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 			std::cout << caster->role << " obtained 1 Sun Blade!\n";
 			setColor(7);
 			caster->sunBlade++;
-			dealingDamage(&(*caster), &(*target), 0, 0, caster->health, 0, 0, 0);
+			dealingDamage(caster, target);
 		}
 		else
 		{
@@ -978,7 +1039,7 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 			printf("additional magic damage!\n");
 			setColor(7);
 			caster->omniVamp += 40;
-			dealingDamage(&(*caster), &(*target), 0, 0, caster->health, target->maxHealth , 0, 0);
+			dealingDamage(caster, target);
 			caster->omniVamp -= 40;
 		}
 		break;
@@ -1002,7 +1063,7 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 			target->health += shieldHeal;
 			target->health > target->maxHealth ? target->health = target->maxHealth : target->health = target->health;
 		}
-
+		if (target->range == -100) damageTaken /= 100;
 		int restore = caster->maxHealth * 9 / 100;
 		if (caster->poisoned > 0) restore = restore * 4 / 10;
 		std::cout << caster->role << " brandish their hammer, deals ";
@@ -1045,6 +1106,8 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 			target->health > target->maxHealth ? target->health = target->maxHealth : target->health = target->health;
 		}
 
+		if (target->range == -100) damageTaken /= 100;
+
 		setColor(12);
 		std::cout << damageTaken << " damage!\n";
 		setColor(7);
@@ -1080,6 +1143,7 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 			target->health += shieldHeal;
 			target->health > target->maxHealth ? target->health = target->maxHealth : target->health = target->health;
 		}
+		if (target->range == -100) damageTaken /= 100;
 		setColor(14);
 		std::cout << caster->role, setColor(7);
 		std::cout << " dealt ", setColor(5);
@@ -1110,12 +1174,15 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 			target->health += shieldHeal;
 			target->health > target->maxHealth ? target->health = target->maxHealth : target->health = target->health;
 		}
+		if (target->range == -100) damageTaken /= 100;
 		setColor(14);
 		std::cout << caster->role, setColor(7);
 		std::cout << " dealt ", setColor(5);
 		std::cout << damageTaken << " damage ", setColor(7);
 		std::cout << "to ", setColor(14);
 		std::cout << target->role, setColor(7);
+
+
 		target->health -= damageTaken;
 		if (target->bleeding) bleedingDmg(target, caster);
 		break;
@@ -1143,7 +1210,7 @@ void useSpell_1(Entities* caster, Entities* target, Entities* machineA, Entities
 void useSpell_2(Entities* caster, Entities* target, int maxHP, int mana, int playerHealth) {
 	int damageTaken = 0, damageTaken2 = 0;
 	int missingHealth = target->maxHealth - target->health;
-	switch ((*caster).range)
+	switch (caster->range)
 	{
 	case 1:
 	{
@@ -1161,78 +1228,25 @@ void useSpell_2(Entities* caster, Entities* target, int maxHP, int mana, int pla
 		setColor(1);
 		std::cout << "this turn!\n";
 		setColor(7);
-		dealingDamage(&(*caster), &(*target), false, true, playerHealth, 0, false, 0);
-		break;
-	}
-	case 2:
-	{
-		int shieldDamage = playerHealth / 5 + (*caster).armor + (*caster).magicRes + missingHealth / 4;
-
-		damageTaken = damageOutput(0, target->magicRes * (100 - caster->MRpen) / 100, 0, shieldDamage);
-		if (caster->cooperSeal) damageTaken += damageOutput(0, target->magicRes * (100 - caster->MRpen) / 100, 0, caster->maxHealth * 8 / 100);
-		else if (caster->insult && target->health <= target->maxHealth * 4 / 10) damageTaken = damageTaken * 112 / 100;
-		else if (caster->deathmatch)
-		{
-			int bonusDmg = 0;
-			caster->health <= caster->maxHealth * 4 / 10 ? bonusDmg += damageTaken * 7 / 100 : bonusDmg = bonusDmg;
-			target->health >= target->maxHealth * 6 / 10 ? bonusDmg += damageTaken * 8 / 100 : bonusDmg = bonusDmg;
-			damageTaken += bonusDmg;
-		}
-		if (target->fragile > 0) damageTaken = damageTaken * 12 / 10;
-		if (target->role == "Senior Drawft")
-		{
-			int evasion = rand() % (70 - 1 + 1) + 1;
-			if (evasion <= 20)
-			{
-				damageTaken = 0;
-				setColor(10);
-				std::cout << "DODGED! " << target->role << " takes no damage this round! ";
-				setColor(7);
-			}
-			else if (evasion <= 50)
-			{
-				damageTaken /= 2;
-				setColor(10);
-				std::cout << "GRAZED! " << target->role << " takes half damage this round! ";
-				setColor(7);
-			}
-		}
-
-		if (target->shield > 0)
-		{
-			damageTaken = 0;
-			int shieldHeal = target->maxHealth / 10;
-			if (target->healingBanned) shieldHeal = 0;
-			target->shield--;
-			std::cout << "This damage is blocked! ", setColor(14);
-			std::cout << target->role, setColor(7);
-			std::cout << " restores ", setColor(2);
-			std::cout << shieldHeal << " health!", setColor(7);
-			target->health += shieldHeal;
-			target->health > target->maxHealth ? target->health = target->maxHealth : target->health = target->health;
-		}
-
-		(*target).health -= damageTaken;
-		std::cout << caster->role << " brandished your shield and dealt ";
-		setColor(5);
-		std::cout << damageTaken << " damage!\n";
-		setColor(7);
-		if (target->bleeding) bleedingDmg(target, caster);
+		target->fighter = true;
+		dealingDamage(caster, target);
+		target->fighter = false;
 		break;
 	}
 	case 3:
 	{
-		caster->baseAD += 50, caster->attackDmg += 50;
-		(*caster).omniVamp = (*caster).omniVamp + 10 > 50 ? 50 : (*caster).omniVamp + 10;
+		caster->baseAD += 50;
+		caster->attackDmg += 50;
+		caster->omniVamp = caster->omniVamp + 10 > 50 ? 50 : caster->omniVamp + 10;
 		std::cout << caster->role << "'s attack damage is now increased to ";
 		setColor(12);
-		std::cout << (*caster).attackDmg;
+		std::cout << caster->attackDmg;
 		setColor(7);
 		std::cout << "\nLife-steal is increased to ";
 		setColor(4);
-		std::cout << (*caster).omniVamp << "%\n";
+		std::cout << caster->omniVamp << "%\n";
 		setColor(7);
-		dealingDamage(&(*caster), &(*target), false, false, playerHealth, 0, false, 0);
+		dealingDamage(caster, target);
 		break;
 	}
 	case 4:
@@ -1248,14 +1262,15 @@ void useSpell_2(Entities* caster, Entities* target, int maxHP, int mana, int pla
 	case 5:
 	{
 		printf("This unit doesn't need such of thing, they will perform a normal attack instead\n");
-		dealingDamage(&(*caster), &(*target), false, false, playerHealth, 0, false, 0);
+		dealingDamage(caster, target);
+		caster->mana++;
 		break;
 	}
 	case 6:
 	{
 		setColor(12);
 		std::cout << "Anh Quoc performs a bunch of auto attacks!\n", setColor(7);
-		for (int i = 0; i < 6; i++) dealingDamage(&(*caster), &(*target), false, false, playerHealth, 0, false, false);
+		for (int i = 0; i < 6; i++) dealingDamage(caster, target);
 		break;
 	}
 	case 7:
@@ -1273,7 +1288,7 @@ void useSpell_2(Entities* caster, Entities* target, int maxHP, int mana, int pla
 		caster->sunBlade *= 4;
 		int maxAR = target->armor;
 		caster->ARpen += 15;
-		dealingDamage(&(*caster), &(*target), 0, 0, caster->health, 0, 0, 0);
+		dealingDamage(caster, target);
 		caster->sunBlade = 0;
 		caster->ARpen -= 15;
 		caster->obtainingSunblade = false;
@@ -1329,67 +1344,25 @@ void useSpell2_2(Entities* caster, Entities* target1, Entities* target2, Entitie
 		setColor(12);
 		std::cout << "Meteorite fall!\n", setColor(7);
 		int leastMR = min(target1->magicRes, min(target2->magicRes, target3->magicRes));
-		baseDamageTaken = damageOutput(0, leastMR * (100 - caster->MRpen) / 100, 0, caster->abilityPower * 23 / 10);
-		if (target1->health > 0)
+		baseDamageTaken = damageOutput(0, leastMR * (100 - caster->MRpen) / 100, 0, caster->abilityPower * 27 / 10);
+		Entities* currentTarget = nullptr;
+		for (int i = 1; i <= 3; i++)
 		{
-			int damageTaken = baseDamageTaken;
-			if (caster->cooperSeal) damageTaken += damageOutput(0, leastMR * (100 - caster->MRpen) / 100, 0, caster->maxHealth * 8 / 100);
-			else if (caster->insult && target1->health <= target1->maxHealth * 4 / 10) damageTaken = damageTaken * 112 / 100;
-			else if (caster->deathmatch)
-			{
-				int bonusDmg = 0;
-				caster->health <= caster->maxHealth * 4 / 10 ? bonusDmg += damageTaken * 7 / 100 : bonusDmg = bonusDmg;
-				target1->health >= target1->maxHealth * 6 / 10 ? bonusDmg += damageTaken * 8 / 100 : bonusDmg = bonusDmg;
-				damageTaken += bonusDmg;
-			}
-			target1->health -= damageTaken;
+			i == 1 ? currentTarget = target1 : i == 2 ? currentTarget = target2 : currentTarget = target3;
+			if (currentTarget->health <= 0) continue;
+
+			int damageTaken = runeDmg(currentTarget, caster, baseDamageTaken);
+			if (currentTarget->range == -100) damageTaken /= 100;
+			currentTarget->health -= damageTaken;
 			setColor(14);
 			std::cout << caster->role, setColor(7);
 			std::cout << " dealt to ", setColor(14);
-			std::cout << target1->role, setColor(5);
+			std::cout << currentTarget->role, setColor(5);
 			std::cout << " " << damageTaken << " damage!\n", setColor(7);
 			caster->damageDealt += damageTaken;
 		}
-		if (target2->health > 0)
-		{
-			int damageTaken = baseDamageTaken;
-			if (caster->cooperSeal) damageTaken += damageOutput(0, leastMR * (100 - caster->MRpen) / 100, 0, caster->maxHealth * 8 / 100);
-			else if (caster->insult && target2->health <= target2->maxHealth * 4 / 10) damageTaken = damageTaken * 112 / 100;
-			else if (caster->deathmatch)
-			{
-				int bonusDmg = 0;
-				caster->health <= caster->maxHealth * 4 / 10 ? bonusDmg += damageTaken * 7 / 100 : bonusDmg = bonusDmg;
-				target2->health >= target2->maxHealth * 6 / 10 ? bonusDmg += damageTaken * 8 / 100 : bonusDmg = bonusDmg;
-				damageTaken += bonusDmg;
-			}
-			target2->health -= damageTaken;
-			setColor(14);
-			std::cout << caster->role, setColor(7);
-			std::cout << " dealt to ", setColor(14);
-			std::cout << target2->role, setColor(5);
-			std::cout << " " << damageTaken << " damage!\n", setColor(7);
-			caster->damageDealt += damageTaken;
-		}
-		if (target3->health > 0)
-		{
-			int damageTaken = baseDamageTaken;
-			if (caster->cooperSeal) damageTaken += damageOutput(0, leastMR * (100 - caster->MRpen) / 100, 0, caster->maxHealth * 8 / 100);
-			else if (caster->insult && target3->health <= target3->maxHealth * 4 / 10) damageTaken = damageTaken * 112 / 100;
-			else if (caster->deathmatch)
-			{
-				int bonusDmg = 0;
-				caster->health <= caster->maxHealth * 4 / 10 ? bonusDmg += damageTaken * 7 / 100 : bonusDmg = bonusDmg;
-				target3->health >= target3->maxHealth * 6 / 10 ? bonusDmg += damageTaken * 8 / 100 : bonusDmg = bonusDmg;
-				damageTaken += bonusDmg;
-			}
-			target3->health -= damageTaken;
-			setColor(14);
-			std::cout << caster->role, setColor(7);
-			std::cout << " dealt to ", setColor(14);
-			std::cout << target3->role, setColor(5);
-			std::cout << " " << damageTaken << " damage!\n", setColor(7);
-			caster->damageDealt += damageTaken;
-		}
+		currentTarget = nullptr;
+		free(currentTarget);
 		break;
 	}
 	case 62:

@@ -1,25 +1,140 @@
 #pragma once
 bool inTurn = false;
 
+Entities* luubao = nullptr, * pvinh = nullptr, * anhQuoc = nullptr, * duongLe = nullptr, * minhphan = nullptr, * supporter = nullptr, * fighter = nullptr, * caster = nullptr, * defender = nullptr, * alter = nullptr;
+Entities* slug = nullptr, * chimera = nullptr, * phantom = nullptr, * zombieOrc = nullptr, * spirit = nullptr, * henryFat = nullptr, * singer = nullptr, * shinigami = nullptr, * Free = nullptr, * en_soldier = nullptr, * en_leader = nullptr, * pos_def = nullptr, * em_blade = nullptr, * EoE = nullptr, * cor_blade = nullptr, * cor_cas = nullptr;
+Entities* pha_cleaver = nullptr, * pha_shooter = nullptr, * pha_pioneer = nullptr;
+
+Entities* global_en_1 = nullptr, * global_en_2 = nullptr, * global_en_3 = nullptr;
+Entities* global_py_1 = nullptr, * global_py_2 = nullptr, * global_py_3 = nullptr;
+
+void clearAllEnemyPointers()
+{
+	zombieOrc = nullptr;			pos_def = nullptr;
+	singer = nullptr;				en_leader = nullptr;
+	Free = nullptr;					en_soldier = nullptr;
+	spirit = nullptr;				slug = nullptr;
+	em_blade = nullptr;				EoE = nullptr;
+	chimera = nullptr;				shinigami = nullptr;
+	henryFat = nullptr;				singer = nullptr;
+	pha_cleaver = nullptr, pha_shooter = nullptr, pha_pioneer = nullptr;
+}
+
+void printEveryHealthBar()
+{
+	printHealthBar(global_py_1, 10);
+	printHealthBar(global_py_2, 1);
+	printHealthBar(global_py_3, 11);
+	if (machineA.health > 0) printHealthBar(&machineA, 8);
+	if (machineB.health > 0) printHealthBar(&machineB, 2);
+	if (machineC.health > 0) printHealthBar(&machineC, 9);
+	if (shitcom.health > 0) printHealthBar(&shitcom, 14);
+	printHealthBar(global_en_1, 5);
+	printHealthBar(global_en_2, 13);
+	printHealthBar(global_en_3, 6);
+}
+
+//used to update features that require in-time take turn
+void update()
+{
+	//get atk
+	if (fighter) fighterBaseAD = fighter->baseAD;
+	if (minhphan)
+	{
+		minhphanAP = minhphan->abilityPower;
+		minhphanMRpen = minhphan->MRpen;
+	}
+
+	//phalanx gang
+	short phalanxCount = 0;
+	if (pha_pioneer && pha_pioneer->health > 0) phalanxCount++;
+	if (pha_cleaver && pha_cleaver->health > 0) phalanxCount++;
+	if (pha_shooter && pha_shooter->health > 0) phalanxCount++;
+
+	phalanx = (phalanxCount >= 2);
+
+	if (pha_pioneer)
+	{
+		if (pha_pioneer->health > 0)
+		{
+			pha_cleaver->floating = true;
+			pha_shooter->floating = true;
+		}
+		else
+		{
+			pha_cleaver->floating = false;
+			pha_shooter->floating = false;
+		}
+	}
+
+	if (pha_cleaver && pha_shooter)
+	{
+		if (phalanx)
+		{
+			pha_cleaver->attackDmg = pha_cleaver->baseAD + 500;
+			pha_shooter->ARpen = 50;
+		}
+		else
+		{
+			pha_cleaver->attackDmg = pha_cleaver->baseAD;
+			pha_shooter->ARpen = 0;
+		}
+	}
+
+	//explosive slug
+	if (slug)
+	{
+		int percentMissingHealth = (slug->maxHealth - slug->health) * 100 / slug->maxHealth;
+		const int atkGainPerMissingHealth = slug->challengeMode ? 20 : 12;
+		const int resistanceGainPerMissingHealth = slug->challengeMode ? 7 : 4;
+		slug->attackDmg = slug->baseAD + percentMissingHealth * atkGainPerMissingHealth;
+		if (percentMissingHealth >= 50)
+		{
+			slug->armor = slug->baseAR + resistanceGainPerMissingHealth * percentMissingHealth;
+			slug->magicRes = slug->baseMR + (resistanceGainPerMissingHealth - 1) * percentMissingHealth;
+		}
+	}
+
+	//Free
+	if (Free)
+	{
+		if ((Free->health < Free->maxHealth && Free->standBy) || (Free->taunt > 0) || (Free == global_en_1 && global_en_2->health <= 0 && global_en_3->health <= 0) || (Free == global_en_2 && global_en_1->health <= 0 && global_en_3->health <= 0) || (Free == global_en_3 && global_en_1->health <= 0 && global_en_2->health <= 0))
+		{
+			Free->standBy = false, Free->combat = true;
+			Free->magicRes *= 6;
+		}
+		if (!Free->standBy)
+		{
+			int percent_maxHP = Free->maxHealth * 15 / 100;
+			int shockwaveBonus = 1 + (Free->maxHealth - Free->health) / percent_maxHP;
+			Free->shockwave = shockwaveBonus;
+		}
+	}
+}
+
 void playerChoice(Entities* player, Entities* ally1, Entities* ally2, Entities* enemy1, Entities* enemy2, Entities* enemy3)
 {
+	update();
 	srand(time(NULL));
-	short storeDmg;
+	short storeDmg = 0; 
 	if (!inTurn)
 	{
-		storeDmg = player->attackDmg;
-		player->attackDmg += player->attackDmg / 20 * player->sunBlade;
+		storeDmg = player->attackDmg / 20 * player->sunBlade;
+		player->attackDmg += storeDmg;
 		inTurn = true;
 	}
 
 currentChoice:
 
-	if (enemy1->health <= 0 && enemy2->health <= 0 && enemy3->health <= 0) return;
+	if (enemy1->health <= 0 && enemy2->health <= 0 && enemy3->health <= 0)
+	{
+		player->attackDmg -= storeDmg;
+		inTurn = false;
+		return;
+	}
 	if ((enemy1->floating && enemy2->health <= 0 && enemy3->health <= 0) || (enemy2->floating && enemy1->health <= 0 && enemy3->health <= 0) || (enemy3->floating && enemy2->health <= 0 && enemy1->health <= 0)) return;
 
 	int mana1_2 = 3, mana1_1;
-
-
 
 	(player->range == 7 || player->range == 6 || player->range == 8 || player->range == 12) ? mana1_1 = 2 : mana1_1 = 3;
 
@@ -101,7 +216,7 @@ currentChoice:
 					target == 1 ? choosenEnemy = enemy1 : target == 2 ? choosenEnemy = enemy2 : choosenEnemy = enemy3;
 					if (choosenEnemy->health > 0 && !choosenEnemy->floating)
 					{
-						dealingDamage(player, choosenEnemy, 0, 0, player->maxHealth, choosenEnemy->maxHealth, 0, 0);
+						dealingDamage(player, choosenEnemy);
 						printHealthBar(choosenEnemy, 5);
 						if (choosenEnemy->health <= 0) confirmDead = true;
 					}
@@ -163,9 +278,9 @@ currentChoice:
 					targetLock == 1 ? target = enemy1 : targetLock == 2 ? target = enemy2 : target = enemy3;
 					if (target->health > 0 && !target->floating)
 					{
-						if (machineA.health > 0) dealingDamage(&machineA, target, 0, 0, player->health, target->maxHealth, 0, 0);
-						if (machineB.health > 0) dealingDamage(&machineB, target, 0, 0, player->health, target->maxHealth, 0, 0);
-						if (machineC.health > 0) dealingDamage(&machineC, target, 0, 0, player->health, target->maxHealth, 0, 0);
+						if (machineA.health > 0) dealingDamage(&machineA, target);
+						if (machineB.health > 0) dealingDamage(&machineB, target);
+						if (machineC.health > 0) dealingDamage(&machineC, target);
 						if (target->health <= 0) confirmDead = true;
 					}
 					else
@@ -251,9 +366,9 @@ currentChoice:
 						{
 							player->mana -= mana1_1;
 							useSpell_1(player, targetLock, &machineA, &machineB, &machineC, targetLock->maxHealth);
-							if (machineA.health > 0) dealingDamage(&machineA, targetLock, 0, 0, player->health, targetLock->maxHealth, 0, 0);
-							if (machineB.health > 0) dealingDamage(&machineB, targetLock, 0, 0, player->health, targetLock->maxHealth, 0, 0);
-							if (machineC.health > 0) dealingDamage(&machineC, targetLock, 0, 0, player->health, targetLock->maxHealth, 0, 0);
+							if (machineA.health > 0) dealingDamage(&machineA, targetLock);
+							if (machineB.health > 0) dealingDamage(&machineB, targetLock);
+							if (machineC.health > 0) dealingDamage(&machineC, targetLock);
 							if (player->range == 5) printHealthBar(player, 2);
 							printHealthBar(targetLock, 5);
 							if (targetLock->health <= 0) confirmDeath = true;
@@ -471,7 +586,7 @@ currentChoice:
 									machineX->health *= 2;
 									machineX->attackDmg = machineX->attackDmg * 27 / 10;
 									machineX->armor += 200, machineX->magicRes += 200;
-									dealingDamage(machineX, targetSpell, 0, 0, player->health, targetSpell->maxHealth, 0, 0);
+									dealingDamage(machineX, targetSpell);
 								}
 							}
 							machineX = nullptr;
@@ -502,7 +617,12 @@ currentChoice:
 	{
 		Entities* checkStats = nullptr;
 		char select;
-		std::cout << "Choose enemy to check its stats:\n1. " << enemy1->role << "\n2. " << enemy2->role << "\n3. " << enemy3->role << "\nEnter your choice: ";
+		std::string checkStat = "Choose enemy to check its stats:"; 
+		if (enemy1->role != "blank") checkStat += "\n1. " + enemy1->role;
+		if (enemy2->role != "blank") checkStat += "\n2. " + enemy2->role; 
+		if (enemy3->role != "blank") checkStat += "\n3. " + enemy3->role;
+		checkStat += "\nEnter your choice: ";
+		std::cout << checkStat;
 		std::cin >> select;
 		select == '1' ? checkStats = enemy1 : select == '2' ? checkStats = enemy2 : checkStats = enemy3;
 		printEnemyInfo(checkStats);
@@ -598,17 +718,29 @@ currentChoice:
 			if (reset <= 50) player->fragile = 2;
 		}
 	}
-	player->attackDmg = storeDmg;
+	player->attackDmg -= storeDmg;
 	inTurn = false;
+
+	update();
+}
+
+void enemyMovement(Entities* enemy, Entities* ally1, Entities* ally2, Entities* ally3)
+{
+
 }
 
 void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, Entities* enemy1, Entities* enemy2, Entities* enemy3)
 {
+	global_en_1 = enemy1, global_py_1 = player1,
+	global_en_2 = enemy2, global_py_2 = player2,
+	global_en_3 = enemy3, global_py_3 = player3;
 	bool instaDelete = true;
 	const unsigned short certainSleepTime = (player2->role == "blank" ? 1 : 3);
 	setColor(14);
 	std::cout << "\n|==============================|\n";
-	std::cout << "|         BATTLE START!        |\n";
+	std::cout << "|                              |\n";
+	std::cout << "|        BATTLE START!         |\n";
+	std::cout << "|                              |\n";
 	std::cout << "|==============================|\n\n";
 	setColor(7);
 	system("pause");
@@ -617,33 +749,122 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 	bool specialForce = false, fighterWill = false, painSupress = false, anhquocSupremacy = false;
 	bool emBladeInDiary = false;
 
-	Entities* luubao, * pvinh, * anhQuoc, * duongLe, * minhphan, * supporter, * fighter, * caster, * defender, * alter;
-	player1->range == 10 ? luubao = player1 : player2->range == 10 ? luubao = player2 : player3->range == 10 ? luubao = player3 : luubao = nullptr;
-	player1->range == 8 ? duongLe = player1 : player2->range == 8 ? duongLe = player2 : player3->range == 8 ? duongLe = player3 : duongLe = nullptr;
-	player1->range == 9 ? pvinh = player1 : player2->range == 9 ? pvinh = player2 : player3->range == 9 ? pvinh = player3 : pvinh = nullptr;
-	player1->range == 6 ? anhQuoc = player1 : player2->range == 6 ? anhQuoc = player2 : player3->range == 6 ? anhQuoc = player3 : anhQuoc = nullptr;
-	player1->range == 7 ? minhphan = player1 : player2->range == 7 ? minhphan = player2 : player3->range == 7 ? minhphan = player3 : minhphan = nullptr;
-	player1->range == 11 ? supporter = player1 : player2->range == 11 ? supporter = player2 : player3->range == 11 ? supporter = player3 : supporter = nullptr;
-	player1->range == 1 ? fighter = player1 : player2->range == 1 ? fighter = player2 : player3->range == 1 ? fighter = player3 : fighter = nullptr;
-	player1->range == 4 ? caster = player1 : player2->range == 4 ? caster = player2 : player3->range == 4 ? caster = player3 : caster = nullptr;
-	player1->range == 2 ? defender = player1 : player2->range == 2 ? defender = player2 : player3->range == 2 ? defender = player3 : defender = nullptr;
-	player1->range == 12 ? alter = player1 : player2->range == 12 ? alter = player2 : player3->range == 12 ? alter = player3 : alter = nullptr;
+	//getting roles (essential)
+	Entities* gettingSufficientRole = nullptr;
+	for (int i = 1; i <= 6; i++)
+	{
+		switch (i)
+		{
+		case 1:
+			gettingSufficientRole = player1;
+			break;
+		case 2:
+			gettingSufficientRole = player2;
+			break;
+		case 3:
+			gettingSufficientRole = player3;
+			break;
+		case 4:
+			gettingSufficientRole = enemy1;
+			break;
+		case 5:
+			gettingSufficientRole = enemy2;
+			break;
+		default:
+			gettingSufficientRole = enemy3;
+			break;
+		}
+		switch (gettingSufficientRole->range)
+		{
+			//player path
+		case 1:
+			fighter = gettingSufficientRole;
+			break;
+		case 2:
+			defender = gettingSufficientRole;
+			break;
+		case 4:
+			caster = gettingSufficientRole;
+			break;
+		case 6:
+			anhQuoc = gettingSufficientRole;
+			break;
+		case 7:
+			minhphan = gettingSufficientRole;
+			break;
+		case 8:
+			duongLe = gettingSufficientRole;
+			break;
+		case 9:
+			pvinh = gettingSufficientRole;
+			break;
+		case 10:
+			luubao = gettingSufficientRole;
+			break;
+		case 11:
+			supporter = gettingSufficientRole;
+			break;
+		case 12:
+			alter = gettingSufficientRole;
+			break;
 
-	Entities* slug, * chimera, * phantom, * zombieOrc, * spirit, * henryFat, * singer, * shinigami, * Free, * en_soldier, * en_leader, * pos_def, * em_blade, * EoE, * cor_blade = nullptr, * cor_cas = nullptr;
-	enemy1->role == "Explosive Slug" ? slug = enemy1 : enemy2->role == "Explosive Slug" ? slug = enemy2 : enemy3->role == "Explosive Slug" ? slug = enemy3 : slug = nullptr;
-	enemy1->role == "Chimera" ? chimera = enemy1 : enemy2->role == "Chimera" ? chimera = enemy2 : enemy3->role == "Chimera" ? chimera = enemy3 : chimera = nullptr;
-	enemy1->role == "Phantom" ? phantom = enemy1 : enemy2->role == "Phantom" ? phantom = enemy2 : enemy3->role == "Phantom" ? phantom = enemy3 : phantom = nullptr;
-	enemy1->role == "Zombified Orc" ? zombieOrc = enemy1 : enemy2->role == "Zombified Orc" ? zombieOrc = enemy2 : enemy3->role == "Zombified Orc" ? zombieOrc = enemy3 : zombieOrc = nullptr;
-	enemy1->role == "Vengeful Spirit" ? spirit = enemy1 : enemy2->role == "Vengeful Spirit" ? spirit = enemy2 : enemy3->role == "Vengeful Spirit" ? spirit = enemy3 : spirit = nullptr;
-	enemy1->role == "Henry Fat" ? henryFat = enemy1 : enemy2->role == "Henry Fat" ? henryFat = enemy2 : enemy3->role == "Henry Fat" ? henryFat = enemy3 : henryFat = nullptr;
-	enemy1->role == "The Singer" ? singer = enemy1 : enemy2->role == "The Singer" ? singer = enemy2 : enemy3->role == "The Singer" ? singer = enemy3 : singer = nullptr;
-	enemy1->role == "Reaper" ? shinigami = enemy1 : enemy2->role == "Reaper" ? shinigami = enemy2 : enemy3->role == "Reaper" ? shinigami = enemy3 : shinigami = nullptr;
-	enemy1->role == "Free" ? Free = enemy1 : enemy2->role == "Free" ? Free = enemy2 : enemy3->role == "Free" ? Free = enemy3 : Free = nullptr;
-	enemy1->role == "Enraged Possessed Soldier" ? en_soldier = enemy1 : enemy2->role == "Enraged Possessed Soldier" ? en_soldier = enemy2 : enemy3->role == "Enraged Possessed Soldier" ? en_soldier = enemy3 : en_soldier = nullptr;
-	enemy1->role == "Enraged Possessed Bone-Thrower" ? en_leader = enemy1 : enemy2->role == "Enraged Possessed Bone-Thrower" ? en_leader = enemy2 : enemy3->role == "Enraged Possessed Bone-Thrower" ? en_leader = enemy3 : en_leader = nullptr;
-	enemy1->role == "Possessed Heavy Defender" ? pos_def = enemy1 : enemy2->role == "Possessed Heavy Defender" ? pos_def = enemy2 : enemy3->role == "Possessed Heavy Defender" ? pos_def = enemy3 : pos_def = nullptr;
-	enemy1->range == 101 ? em_blade = enemy1 : em_blade = nullptr;
-	enemy1->range == 150 ? EoE = enemy1 : EoE = nullptr;
+			//enemy path
+
+		case 100:
+			chimera = gettingSufficientRole;
+			break;
+		case 55:
+			zombieOrc = gettingSufficientRole;
+			break;
+		case 57:
+			slug = gettingSufficientRole;
+			break;
+		case 58:
+			phantom = gettingSufficientRole;
+			break;
+		case 59:
+			spirit = gettingSufficientRole;
+			break;
+		case 60:
+			henryFat = gettingSufficientRole;
+			break;
+		case 61:
+			singer = gettingSufficientRole;
+			break;
+		case 62:
+			shinigami = gettingSufficientRole;
+			break;
+		case 63:
+			Free = gettingSufficientRole;
+			break;
+		case 64:
+			en_soldier = gettingSufficientRole;
+			break;
+		case 65:
+			en_leader = gettingSufficientRole;
+			break;
+		case 66:
+			pos_def = gettingSufficientRole;
+			break;
+		case 67:
+			pha_cleaver = gettingSufficientRole;
+			break;
+		case 68:
+			pha_shooter = gettingSufficientRole;
+			break;
+		case 69:
+			pha_pioneer = gettingSufficientRole;
+			break;
+		case 101:
+			em_blade = gettingSufficientRole;
+			break;
+		case 150:
+			EoE = gettingSufficientRole;
+			break;
+		}
+	}
+	gettingSufficientRole = nullptr;
+	free(gettingSufficientRole);
 
 	//module system
 	/*
@@ -740,6 +961,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 		player2->poisoned = 100;
 		player3->poisoned = 100;
 		if (recollectOpStart) emBladeInDiary = true;
+		em_blade->solo = true;
 	}
 
 	if (singer && singer->challengeMode)
@@ -757,6 +979,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 
 	if (Free && Free->challengeMode) skipTurnBanned = true;
 
+	printEveryHealthBar();
 	//Tha battle, overall
 	while ((player1->health > 0 || player2->health > 0 || player3->health > 0) && (enemy1->health > 0 || enemy2->health > 0 || enemy3->health > 0))
 	{
@@ -766,7 +989,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 
 		if (singer && !singer->solo && singer->health > 0 && ((singer == enemy1 && enemy2->health <= 0 && enemy3->health <= 0) || (singer == enemy2 && enemy1->health <= 0 && enemy3->health <= 0) || (singer == enemy3 && enemy1->health <= 0 && enemy2->health <= 0)))
 		{
-			PlaySound(TEXT("ost\\dawnseeker.wav"), NULL, SND_ASYNC);
+			if (!towerMode) PlaySound(TEXT("ost\\dawnseeker.wav"), NULL, SND_ASYNC);
 			setColor(12);
 			printf("\nSoloist: The Singer no longer possess \"Low-altitude hovering\", instead has significantly increased ATK and inflicts AoE attacks\n");
 			singer->solo = true;
@@ -775,6 +998,8 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 			singer->MRpen = 25;
 			Sleep(3000);
 		}
+
+		update();
 
 		//Poison kissu
 		int playerRemain = 0, poisonedPlayer = 0;
@@ -788,8 +1013,8 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 				poisoned->health > 0 ? playerRemain++ : playerRemain = playerRemain;
 				if (poisoned->health > 0 && poisoned->poisoned > 0)
 				{
-					int poisonBaseDmg = 200 + ((poisoned->maxHealth - poisoned->health) * 700 / poisoned->maxHealth);
-					poisonBaseDmg > 500 ? poisonBaseDmg = 500 : poisonBaseDmg = poisonBaseDmg;
+					int poisonBaseDmg = 300 + ((poisoned->maxHealth - poisoned->health) * 725 / poisoned->maxHealth);
+					poisonBaseDmg > 650 ? poisonBaseDmg = 650 : poisonBaseDmg = poisonBaseDmg;
 					int poisonDmg = damageOutput(0, poisoned->magicRes, 0, poisonBaseDmg);
 					if (henryFat->challengeMode)
 					{
@@ -800,7 +1025,24 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 					setColor(14);
 					std::cout << "Poison triggers! " << poisoned->role << " took " << poisonDmg << " damage!\n", setColor(7);
 					poisoned->health -= poisonDmg;
-					poisoned->poisoned--;
+					if (poisoned->health <= 0 && poisoned->emergencyOn)
+					{
+						std::cout << "The switch is on! " << poisoned->role << " are healed for ";
+						setColor(2);
+						std::cout << 1000 + poisonDmg << " HP ";
+						setColor(11);
+						std::cout << "and gains ";
+						setColor(14);
+						std::cout << "100% dodge";
+						setColor(11);
+						std::cout << " in the next turn!\n";
+						poisoned->health = 1000 + poisonDmg;
+						poisoned->health > poisoned->maxHealth ? poisoned->health = poisoned->maxHealth : poisoned->health;
+						poisoned->mana += 3;
+						poisoned->readytoDodge = true;
+						poisoned->emergencyOn = false;
+						poisoned->healingDone += 1000 + poisonDmg;
+					}
 					poisonedPlayer++;
 					henryFat->damageDealt += poisonDmg;
 				}
@@ -818,6 +1060,10 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 				henryFat->magicRes = henryFat->baseMR;
 			}
 		}
+
+		if (player1->poisoned) player1->poisoned--;
+		if (player2->poisoned) player2->poisoned--;
+		if (player3->poisoned) player3->poisoned--;
 
 		if (player1->health <= 0 && player2->health <= 0 && player3->health <= 0) break;
 
@@ -920,7 +1166,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 				chimera->predatorMode = true;
 				chimera->critUp = 35;
 				chimera->armor += 400;
-				chimera->magicRes -= 400;
+				chimera->magicRes <= 400 ? chimera->magicRes = 0 : chimera->magicRes -= 400;
 				chimera->abilityPower = 0;
 				!(singer && singer->challengeMode) ? chimera->attackDmg = 573 : chimera->attackDmg = 573 * 15 / 10;
 				if (pvinh) pvinh->shield = 0;
@@ -940,7 +1186,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 				chimera->divine = true;
 				chimera->predatorMode = false;
 				chimera->critUp = 0;
-				chimera->armor -= 400;
+				chimera->armor <= 400 ? chimera->armor = 0 : chimera->armor -= 400;
 				chimera->magicRes += 400;
 				chimera->attackDmg = 0;
 				!(singer && singer->challengeMode) ? chimera->abilityPower = 535 : chimera->abilityPower = 535 * 15 / 10;
@@ -1023,7 +1269,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 				player1->attackDmg *= 2, player1->abilityPower *= 2;
 				if (player1->taunt)
 				{
-					dealingDamage(player1, pos_def, 0, 0, player1->health, pos_def->maxHealth, 0, 0);
+					dealingDamage(player1, pos_def);
 					player1->taunt--;
 				}
 				else playerChoice(player1, player2, player3, enemy1, enemy2, enemy3);
@@ -1037,7 +1283,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 			{
 				if (player1->taunt)
 				{
-					dealingDamage(player1, pos_def, 0, 0, player1->health, pos_def->maxHealth, 0, 0);
+					dealingDamage(player1, pos_def);
 					player1->taunt--;
 				}
 				else playerChoice(player1, player2, player3, enemy1, enemy2, enemy3);
@@ -1056,7 +1302,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 				player2->attackDmg *= 2, player2->abilityPower *= 2;
 				if (player2->taunt)
 				{
-					dealingDamage(player2, pos_def, 0, 0, player2->health, pos_def->maxHealth, 0, 0);
+					dealingDamage(player2, pos_def);
 					player2->taunt--;
 				}
 				else playerChoice(player2, player1, player3, enemy1, enemy2, enemy3);
@@ -1070,7 +1316,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 			{
 				if (player2->taunt)
 				{
-					dealingDamage(player2, pos_def, 0, 0, player2->health, pos_def->maxHealth, 0, 0);
+					dealingDamage(player2, pos_def);
 					player2->taunt--;
 				}
 				else playerChoice(player2, player1, player3, enemy1, enemy2, enemy3);
@@ -1089,7 +1335,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 				player3->attackDmg *= 2, player3->abilityPower *= 2;
 				if (player3->taunt)
 				{
-					dealingDamage(player3, pos_def, 0, 0, player3->health, pos_def->maxHealth, 0, 0);
+					dealingDamage(player3, pos_def);
 					player3->taunt--;
 				}
 				else playerChoice(player3, player1, player2, enemy1, enemy2, enemy3);
@@ -1103,12 +1349,14 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 			{
 				if (player3->taunt)
 				{
-					dealingDamage(player3, pos_def, 0, 0, player3->health, pos_def->maxHealth, 0, 0);
+					dealingDamage(player3, pos_def);
 					player3->taunt--;
 				}
 				else playerChoice(player3, player1, player2, enemy1, enemy2, enemy3);
 			}
 		}
+
+		update();
 
 		if (emBladeInDiary)
 		{
@@ -1144,7 +1392,6 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 
 		if (Free && Free->health > 0)
 		{
-			(Free->health < Free->maxHealth && Free->standBy) || (Free->taunt > 0) || (Free == enemy1 && enemy2->health <= 0 && enemy3->health <= 0) || (Free == enemy2 && enemy1->health <= 0 && enemy3->health <= 0) || (Free == enemy3 && enemy1->health <= 0 && enemy2->health <= 0) ? Free->standBy = false, Free->combat = true : 1;
 			if (Free->standBy)
 			{
 				const int baseHealing = 750;
@@ -1163,12 +1410,6 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 					std::cout << realHealing << " HP!\n", setColor(7);
 				}
 			}
-			else
-			{
-				int percent_maxHP = Free->maxHealth * 15 / 100;
-				int shockwaveBonus = 1 + (Free->maxHealth - Free->health) / percent_maxHP;
-				Free->shockwave = shockwaveBonus;
-			}
 		}		
 
 		if (enemy1->health > 0 && (enemy1 != Free || (enemy1 == Free && enemy1->combat)))
@@ -1185,7 +1426,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 				if (shinigami && enemy1 == shinigami)
 				{
 					if (shinigami->challengeMode || (shinigami->turn % 3 == 0 && shinigami->turn != 0)) useSpell2_2(enemy1, player1, player2, player3);
-					else dealingDamage(enemy1, gotAtked, 0, 0, gotAtked->maxHealth, enemy1->maxHealth, 0, 0);
+					else dealingDamage(enemy1, gotAtked);
 				}
 				else
 				{
@@ -1235,7 +1476,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 						{
 							shitcom.health > 0 ? targeto = &shitcom : machineA.health > 0 ? targeto = &machineA : machineB.health > 0 ? targeto = &machineB : targeto = &machineC;
 						}
-						if (targeto) dealingDamage(enemy1, targeto, specialForce, fighterWill, targeto->maxHealth, enemy1->maxHealth, painSupress, anhquocSupremacy);
+						if (targeto) dealingDamage(enemy1, targeto);
 					}
 					else
 					{
@@ -1265,7 +1506,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 								targeto = &shitcom;
 								break;
 							}
-							if (targeto->health > 0) dealingDamage(enemy1, targeto, specialForce, fighterWill, targeto->maxHealth, enemy1->maxHealth, painSupress, anhquocSupremacy);
+							if (targeto->health > 0) dealingDamage(enemy1, targeto);
 							else continue;
 						}
 					}
@@ -1274,8 +1515,8 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 			}
 			else
 			{
-				defender->armor = defender->baseAR * 28 / 10, defender->magicRes = defender->baseMR * 28 / 10;
-				dealingDamage(enemy1, defender, 0, 0, defender->health, enemy1->maxHealth, 0, 0);
+				defender->armor = defender->baseAR * 18 / 10, defender->magicRes = defender->baseMR * 18 / 10;
+				dealingDamage(enemy1, defender);
 				defender->armor = defender->baseAR, defender->magicRes = defender->baseMR;
 				enemy1->taunt--;
 			}
@@ -1334,7 +1575,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 					if (shinigami && enemy2 == shinigami)
 					{
 						if (shinigami->challengeMode || (shinigami->turn % 3 == 0 && shinigami->turn != 0)) useSpell2_2(enemy2, player1, player2, player3);
-						else dealingDamage(enemy2, gotAtked, 0, 0, gotAtked->maxHealth, enemy2->maxHealth, 0, 0);
+						else dealingDamage(enemy2, gotAtked);
 					}
 					else
 					{
@@ -1385,7 +1626,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 							{
 								shitcom.health > 0 ? targeto = &shitcom : machineA.health > 0 ? targeto = &machineA : machineB.health > 0 ? targeto = &machineB : targeto = &machineC;
 							}
-							if (targeto) dealingDamage(enemy2, targeto, specialForce, fighterWill, targeto->maxHealth, enemy2->maxHealth, painSupress, anhquocSupremacy);
+							if (targeto) dealingDamage(enemy2, targeto);
 						}
 						else
 						{
@@ -1415,7 +1656,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 									targeto = &shitcom;
 									break;
 								}
-								if (targeto->health > 0) dealingDamage(enemy2, targeto, specialForce, fighterWill, targeto->maxHealth, enemy2->maxHealth, painSupress, anhquocSupremacy);
+								if (targeto->health > 0) dealingDamage(enemy2, targeto);
 								else continue;
 							}
 						}
@@ -1424,8 +1665,8 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 				}
 				else
 				{
-					defender->armor = defender->baseAR * 28 / 10, defender->magicRes = defender->baseMR * 28 / 10;
-					dealingDamage(enemy2, defender, 0, 0, defender->health, enemy2->maxHealth, 0, 0);
+					defender->armor = defender->baseAR * 18 / 10, defender->magicRes = defender->baseMR * 18 / 10;
+					dealingDamage(enemy2, defender);
 					defender->armor = defender->baseAR, defender->magicRes = defender->baseMR;
 					enemy2->taunt--;
 				}
@@ -1464,7 +1705,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 				if (shinigami && enemy3 == shinigami)
 				{
 					if (shinigami->challengeMode || (shinigami->turn % 3 == 0 && shinigami->turn != 0)) useSpell2_2(enemy3, player1, player2, player3);
-					else dealingDamage(enemy3, gotAtked, 0, 0, gotAtked->maxHealth, enemy3->maxHealth, 0, 0);
+					else dealingDamage(enemy3, gotAtked);
 				}
 				else
 				{
@@ -1527,7 +1768,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 						{
 							shitcom.health > 0 ? targeto = &shitcom : machineA.health > 0 ? targeto = &machineA : machineB.health > 0 ? targeto = &machineB : targeto = &machineC;
 						}
-						if (targeto) dealingDamage(enemy3, targeto, specialForce, fighterWill, targeto->maxHealth, enemy3->maxHealth, painSupress, anhquocSupremacy);
+						if (targeto) dealingDamage(enemy3, targeto);
 					}
 					else
 					{
@@ -1557,7 +1798,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 								targeto = &shitcom;
 								break;
 							}
-							if (targeto->health > 0) dealingDamage(enemy3, targeto, specialForce, fighterWill, targeto->maxHealth, enemy3->maxHealth, painSupress, anhquocSupremacy);
+							if (targeto->health > 0) dealingDamage(enemy3, targeto);
 							else continue;
 						}
 					}
@@ -1566,8 +1807,8 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 			}
 			else
 			{
-				defender->armor = defender->baseAR * 28 / 10, defender->magicRes = defender->baseMR * 28 / 10;
-				dealingDamage(enemy3, defender, 0, 0, defender->health, enemy3->maxHealth, 0, 0);
+				defender->armor = defender->baseAR * 18 / 10, defender->magicRes = defender->baseMR * 18 / 10;
+				dealingDamage(enemy3, defender);
 				defender->armor = defender->baseAR, defender->magicRes = defender->baseMR;
 				enemy3->taunt--;
 			}
@@ -1597,34 +1838,15 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 			}
 		}
 
-		if (slug)
+		if (slug && slug->health <= 0)
 		{
-			if (slug->health <= slug->maxHealth / 2 && slug->resistanceBonus)
-			{
-				slug->resistanceBonus = false;
-				if (!slug->challengeMode)
-				{
-					slug->armor = slug->armor - 600 < 0 ? 0 : slug->armor - 600;
-					slug->magicRes = slug->magicRes - 600 < 0 ? 0 : slug->magicRes - 600;
-					slug->attackDmg += 500;
-				}
-				else
-				{
-					slug->armor = slug->armor - 1000 < 0 ? 0 : slug->armor - 1000;
-					slug->magicRes = slug->magicRes - 1000 < 0 ? 0 : slug->magicRes - 1000;
-					!(singer && singer->challengeMode) ? slug->attackDmg += 800 : slug->attackDmg += 1200;
-				}
-			}
-			else if (slug->health <= 0)
-			{
-				setColor(14);
-				std::cout << "TRUE ART IS AN EXPLOSION! " << slug->role << " exploded and dealt 1000 damage to all friendly units!\n", setColor(7);
-				player1->shield <= 0 ? (player1->fragile > 0 ? player1->health -= 1200 : player1->health -= 1000) : (player1->shield--, player1->health += player1->maxHealth / 5);
-				player2->shield <= 0 ? (player2->fragile > 0 ? player2->health -= 1200 : player2->health -= 1000) : (player2->shield--, player2->health += player2->maxHealth / 5);
-				player3->shield <= 0 ? (player3->fragile > 0 ? player3->health -= 1200 : player3->health -= 1000) : (player3->shield--, player3->health += player3->maxHealth / 5);
-				slug = nullptr;
-				free(slug);
-			}
+			setColor(14);
+			std::cout << "TRUE ART IS AN EXPLOSION! " << slug->role << " exploded and dealt 1000 damage to all friendly units!\n", setColor(7);
+			player1->shield <= 0 ? (player1->fragile > 0 ? player1->health -= 1200 : player1->health -= 1000) : (player1->shield--, player1->health += player1->maxHealth / 5);
+			player2->shield <= 0 ? (player2->fragile > 0 ? player2->health -= 1200 : player2->health -= 1000) : (player2->shield--, player2->health += player2->maxHealth / 5);
+			player3->shield <= 0 ? (player3->fragile > 0 ? player3->health -= 1200 : player3->health -= 1000) : (player3->shield--, player3->health += player3->maxHealth / 5);
+			slug = nullptr;
+			free(slug);
 		}
 
 		if (singer && singer->health <= 0)
@@ -1698,7 +1920,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 		}
 
 		//Enraged kinds - S
-		if (en_soldier && en_soldier->health > 0 && (!en_soldier->challengeMode || (en_soldier->challengeMode && en_soldier->turn >= 3)))
+		if (en_soldier && en_soldier->health > 0 && (!en_soldier->challengeMode || (en_soldier->challengeMode && en_soldier->shield)))
 		{
 			setColor(6);
 			std::cout << en_soldier->role << " loses ", setColor(12);
@@ -1706,7 +1928,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 			en_soldier->health -= en_soldier->maxHealth / 10;
 		}
 
-		if (en_leader && en_leader->health > 0 && (!en_leader->challengeMode || (en_leader->challengeMode && en_leader->turn >= 3)))
+		if (en_leader && en_leader->health > 0 && (!en_leader->challengeMode || (en_leader->challengeMode && en_leader->shield)))
 		{
 			setColor(6);
 			std::cout << en_leader->role << " loses ", setColor(12);
@@ -1742,7 +1964,7 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 		{
 			if (em_blade->health <= 0 && instaDelete)
 			{
-				em_blade->maxHealth = 21500;
+				em_blade->maxHealth = em_blade->challengeMode ? (21500 * 11 / 10) : 21500;
 				em_blade->health = em_blade->maxHealth;
 				em_blade->role = "Emperors' Blade - The Pursuer";
 				instaDelete = false;
@@ -1758,8 +1980,15 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 					}
 					em_blade->attackDmg += 200;
 					em_blade->baseAD += 200;
-					em_blade->magicRes += 200;
-					em_blade->armor += 222;
+					em_blade->magicRes = 777;
+					em_blade->armor = 888;
+					em_blade->turn = 2;
+				}
+				else
+				{
+					setColor(12);
+					std::cout << "It's still far from over!\n";
+					em_blade->turn = 2;
 				}
 				if (em_blade->challengeMode)
 				{
@@ -1773,10 +2002,9 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 			if (em_blade->turn % 3 == 2 && (!instaDelete || recollectOpStart))
 			{
 				setColor(8);
-				std::cout << "His blade staining red...\n";
+				std::cout << "His blade is glowing...\n";
 				setColor(7);
 				Sleep(3000);
-				em_blade->attackDmg = em_blade->attackDmg * 8 / 10;
 				em_blade->solo = true;
 				player1->poisoned = 10;
 				player2->poisoned = 10;
@@ -1784,7 +2012,6 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 			}
 			else
 			{
-				em_blade->attackDmg = em_blade->baseAD;
 				em_blade->solo = false;
 			}
 
@@ -1837,21 +2064,13 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 			}
 		}
 
-		printHealthBar(player1, 10);
-		printHealthBar(player2, 1);
-		printHealthBar(player3, 11);
-		if (machineA.health > 0) printHealthBar(&machineA, 8);
-		if (machineB.health > 0) printHealthBar(&machineB, 2);
-		if (machineC.health > 0) printHealthBar(&machineC, 9);
-		if (shitcom.health > 0) printHealthBar(&shitcom, 14);
-		printHealthBar(enemy1, 5);
-		printHealthBar(enemy2, 13);
-		printHealthBar(enemy3, 6);
+		printEveryHealthBar();
+
 		if (fighter && fighter->health > 0)
 		{
 			setColor(6);
-			std::cout << "Stay determined! Fighter gained 30 attack damage and subtract all enemy's armor by 15!\n", setColor(7);
-			fighter->baseAD += 30, fighter->attackDmg += 30;
+			std::cout << "Stay determined! Fighter gained 40 attack damage and subtract all enemy's armor by 15!\n", setColor(7);
+			fighter->baseAD += 40, fighter->attackDmg += 40;
 			enemy1->baseAR -= 15, enemy1->armor -= 15;
 			enemy2->baseAR -= 15, enemy2->armor -= 15;
 			enemy3->baseAR -= 15, enemy3->armor -= 15;
@@ -1860,8 +2079,8 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 		if (phantom && (phantom->possessTalent == 1 || phantom->possessTalent2 == 1) && phantom->health > 0)
 		{
 			setColor(6);
-			std::cout << "Stay chaotic! Phantom gained 30 attack damage and subtract all friendly unit's armor by 8!\n", setColor(7);
-			phantom->baseAD += 30, phantom->attackDmg += 30;
+			std::cout << "Stay chaotic! Phantom gained 50 attack damage and subtract all friendly unit's armor by 8!\n", setColor(7);
+			phantom->baseAD += 50, phantom->attackDmg += 50;
 			player1->baseAR -= 8, player1->armor -= 8;
 			player2->baseAR -= 8, player2->armor -= 8;
 			player3->baseAR -= 8, player3->armor -= 8;
@@ -1902,115 +2121,145 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 				bool isChallengeMode = enemy1->challengeMode;
 				/////////////////////////////////////////////////////////////////////////////////////////////////////																									
 				*enemy1 = createBlankTarget(), * enemy2 = createBlankTarget(), * enemy3 = createBlankTarget();
-				zombieOrc = nullptr;			pos_def = nullptr;
-				singer = nullptr;				en_leader = nullptr;
-				Free = nullptr;					en_soldier = nullptr;
-				spirit = nullptr;				slug = nullptr;
-				em_blade = nullptr;				EoE = nullptr;
-				chimera = nullptr;				shinigami = nullptr;
-				henryFat = nullptr;				singer = nullptr;
+				clearAllEnemyPointers();
 
-				std::vector<short> randomStuff;
-				if ((towerRound <= 5 && !isChallengeMode) || (isChallengeMode && !towerRound))
+				if (towerRound % 5 == 4)
 				{
-					for (int j = 1; j <= 5; j++) randomStuff.push_back(j);
+					* enemy1 = createSwarm(),
+					* enemy2 = createSwarm(),
+					* enemy3 = createSwarm();
 				}
 				else
 				{
-					for (int j = 4; j <= 12; j++) randomStuff.push_back(j);
-				}
-				unsigned num = std::chrono::system_clock::now().time_since_epoch().count();
-				std::shuffle(randomStuff.begin(), randomStuff.end(), std::default_random_engine(num));
-
-				Entities* resurrectEnemy = nullptr;
-				for (int i = 1; i <= 3; i++)
-				{
-					i == 1 ? resurrectEnemy = enemy1 : i == 2 ? resurrectEnemy = enemy2 : resurrectEnemy = enemy3;
-
-					const unsigned short randomEnemySeed = randomStuff[i - 1];
-					switch (randomEnemySeed)
+					std::vector<short> shuffleEnemySeed;
+					if (towerRound <= 2)
 					{
-					case 1:
-						*resurrectEnemy = createGoblinChamp(0);
-						break;
-					case 2:
-						*resurrectEnemy = createSeniorShaman(0);
-						break;
-					case 4:
-						*resurrectEnemy = createAplha(0);
-						henryFat = resurrectEnemy;
-						break;
-					case 7:
-						*resurrectEnemy = createChimera(0);
-						chimera = resurrectEnemy;
-						if (isChallengeMode) chimera->maxHealth += 5000, chimera->health += 5000;
-						break;
-					case 8:
-						*resurrectEnemy = createShinigami(0);
-						shinigami = resurrectEnemy;
-						if (isChallengeMode)
+						for (int j = 1; j <= 3; j++) shuffleEnemySeed.push_back(j);
+					}
+					else if (towerRound <= 4)
+					{
+						for (int j = 4; j <= 6; j++) shuffleEnemySeed.push_back(j);
+					}
+					else if (towerRound <= 7)
+					{
+						for (int j = 4; j <= 10; j++) shuffleEnemySeed.push_back(j);
+					}
+					else
+					{
+						if (towerRound >= 10) isChallengeMode = true;
+						for (int j = 4; j <= 14; j++) shuffleEnemySeed.push_back(j);
+					}
+					unsigned num = std::chrono::system_clock::now().time_since_epoch().count();
+					std::shuffle(shuffleEnemySeed.begin(), shuffleEnemySeed.end(), std::default_random_engine(num));
+
+					Entities* resurrectEnemy = nullptr;
+					for (byte i = 1; i <= 3; i++)
+					{
+						i == 1 ? resurrectEnemy = enemy1 : i == 2 ? resurrectEnemy = enemy2 : resurrectEnemy = enemy3;
+
+						const unsigned short randomEnemySeed = shuffleEnemySeed[i - 1];
+						switch (randomEnemySeed)
 						{
-							shinigami->baseAD -= shinigami->baseAD / 4;
-							shinigami->attackDmg = shinigami->baseAD;
+						case 1:
+							*resurrectEnemy = createGoblinChamp(0);
+							break;
+						case 2:
+							*resurrectEnemy = createSeniorShaman(0);
+							break;
+						case 4:
+							*resurrectEnemy = createAplha(0);
+							henryFat = resurrectEnemy;
+							break;
+						case 8:
+							*resurrectEnemy = createChimera(0);
+							chimera = resurrectEnemy;
+							if (isChallengeMode) chimera->maxHealth += 5000, chimera->health += 5000;
+							break;
+						case 9:
+							*resurrectEnemy = createShinigami(0);
+							shinigami = resurrectEnemy;
+							if (isChallengeMode)
+							{
+								shinigami->baseAD -= shinigami->baseAD / 4;
+								shinigami->attackDmg = shinigami->baseAD;
+							}
+							break;
+						case 7:
+							*resurrectEnemy = createFree(0);
+							Free = resurrectEnemy;
+							if (isChallengeMode) skipTurnBanned = true;
+							break;
+						case 3:
+							*resurrectEnemy = createZombieOrc(0);
+							zombieOrc = resurrectEnemy;
+							break;
+						case 5:
+							*resurrectEnemy = createSpirit(0);
+							spirit = resurrectEnemy;
+							break;
+						case 6:
+							*resurrectEnemy = createExplosiveSlug(0);
+							slug = resurrectEnemy;
+							break;
+						case 10:
+							*resurrectEnemy = createPosKnight(0);
+							en_soldier = resurrectEnemy;
+							if (isChallengeMode) resurrectEnemy->shield += 3;
+							break;
+						case 11:
+							*resurrectEnemy = createPosDef(0);
+							pos_def = resurrectEnemy;
+							break;
+						case 13:
+							*resurrectEnemy = createSinger(0);
+							singer = resurrectEnemy;
+							break;
+						case 12:
+							*resurrectEnemy = createPosKnight_L(0);
+							if (isChallengeMode) resurrectEnemy->shield += 3;
+							en_leader = resurrectEnemy;
+							break;
+						case 14:
+							clearAllEnemyPointers();
+							*enemy1 = createPhaCleaver(0);
+							*enemy2 = createPhaShooter(0);
+							*enemy3 = createPhaPioneer(0);
+							pha_cleaver = enemy1;
+							pha_shooter = enemy2;
+							pha_pioneer = enemy3;
+							goto exit_loop;
+							break;
 						}
-						break;
-					case 6:
-						*resurrectEnemy = createFree(0);
-						Free = resurrectEnemy;
-						if (isChallengeMode) skipTurnBanned = true;
-						break;
-					case 3:
-						*resurrectEnemy = createZombieOrc(0);
-						zombieOrc = resurrectEnemy;
-						break;
-					case 5:
-						*resurrectEnemy = createSpirit(0);
-						spirit = resurrectEnemy;
-						break;
-					case 9:
-						*resurrectEnemy = createPosKnight(0);
-						en_soldier = resurrectEnemy;
-						if (isChallengeMode) resurrectEnemy->shield += 3;
-						break;
-					case 10:
-						*resurrectEnemy = createPosDef(0);
-						pos_def = resurrectEnemy;
-						break;
-					case 12:
-						*resurrectEnemy = createSinger(0);
-						singer = resurrectEnemy;
-						break;
-					case 11:
-						*resurrectEnemy = createPosKnight_L(0);
-						if (isChallengeMode) resurrectEnemy->shield += 3;
-						en_leader = resurrectEnemy;
-						break;
+						if (minhphan) resurrectEnemy->healingBanned = true;
 					}
-					if (minhphan) resurrectEnemy->healingBanned = true;
-				}
-				if (isChallengeMode)
-				{
-					enemy1->challengeMode = true, enemy2->challengeMode = true, enemy3->challengeMode = true;
-					if (pos_def)
+
+				exit_loop:
+					if (isChallengeMode)
 					{
-						const short bonusArmor = pos_def->armor / 5;
-						enemy1->armor += bonusArmor;
-						enemy2->armor += bonusArmor;
-						enemy3->armor += bonusArmor;
+						enemy1->challengeMode = true, enemy2->challengeMode = true, enemy3->challengeMode = true;
+						if (pos_def)
+						{
+							const short bonusArmor = pos_def->armor / 5;
+							enemy1->armor += bonusArmor;
+							enemy2->armor += bonusArmor;
+							enemy3->armor += bonusArmor;
+						}
+						if (singer)
+						{
+							enemy1->attackDmg += enemy1->attackDmg / 2, enemy1->abilityPower += enemy1->abilityPower / 2;
+							enemy2->attackDmg += enemy2->attackDmg / 2, enemy2->abilityPower += enemy2->abilityPower / 2;
+							enemy3->attackDmg += enemy3->attackDmg / 2, enemy3->abilityPower += enemy3->abilityPower / 2;
+						}
 					}
-					if (singer)
-					{
-						enemy1->attackDmg += enemy1->attackDmg / 2, enemy1->abilityPower += enemy1->abilityPower / 2;
-						enemy2->attackDmg += enemy2->attackDmg / 2, enemy2->abilityPower += enemy2->abilityPower / 2;
-						enemy3->attackDmg += enemy3->attackDmg / 2, enemy3->abilityPower += enemy3->abilityPower / 2;
-					}
+					resurrectEnemy = nullptr;
+					free(resurrectEnemy);
 				}
-				resurrectEnemy = nullptr;
-				free(resurrectEnemy);
 				setColor(12);
-				std::cout << "\nNew challengers appeared: " << enemy1->role << " / " << enemy2->role << " / " << enemy3->role << ".\n\n";
+				std::cout << "\nTransformation completed: " << enemy1->role << " / " << enemy2->role << " / " << enemy3->role << ".\n\n";
 				std::cout << "Current renew round: ";
-				towerRound <= 5 ? setColor(LI_GREEN) : towerRound < 10 ? setColor(LI_YELLOW) : setColor(BO_RED);
+				towerRound <= 4 ? setColor(LI_GREEN) : towerRound < 10 ? setColor(LI_YELLOW) : setColor(BO_RED);
+				if (towerRound == 5) PlaySound(TEXT("ost\\imi_mid.wav"), NULL, SND_LOOP | SND_ASYNC);
+				else if (towerRound == 10) PlaySound(TEXT("ost\\imi_late.wav"), NULL, SND_LOOP | SND_ASYNC);
 				std::cout << towerRound << '\n';
 				setColor(8);
 			}
@@ -2071,10 +2320,21 @@ void battleStart_3v3(Entities* player1, Entities* player2, Entities* player3, En
 	matchHistory.close();
 
 	skipTurnBanned = false, towerMode = false;
-	recollectOpStart = false;
+	recollectOpStart = false, phalanx = false;
+
+	clearAllEnemyPointers();
+	cor_blade = nullptr;				cor_cas = nullptr;
+
+	fighter = nullptr, defender = nullptr, caster = nullptr, supporter = nullptr;
+	duongLe = nullptr, pvinh = nullptr, minhphan = nullptr, anhQuoc = nullptr;
+	luubao = nullptr, alter = nullptr;
+	global_en_1 = nullptr, global_en_2 = nullptr, global_en_3 = nullptr;
+	global_py_1 = nullptr, global_py_2 = nullptr, global_py_3 = nullptr;
+
 	machineA = createBlankTarget(); machineB = createBlankTarget(); machineC = createBlankTarget(); shitcom = createBlankTarget();
 	*player1 = createBlankTarget(), * player2 = createBlankTarget(), * player3 = createBlankTarget();
 	*enemy1 = createBlankTarget(), * enemy2 = createBlankTarget(), * enemy3 = createBlankTarget();
+
 	system("pause");
 }
 

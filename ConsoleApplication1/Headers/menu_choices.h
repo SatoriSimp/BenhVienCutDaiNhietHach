@@ -36,7 +36,7 @@ void chooseRune(Entities* player)
 			player->mana += 2;
 			break;
 		}
-		rune3 = avoidRetardInput("\nChoose 3rd rune:\n1. Resistances +50\n2. Armor penetration +5%\n3. Magic penetration +5%\nYour choice: ");
+		rune3 = avoidRetardInput("\nChoose 3rd rune:\n1. Resistances +50\n2. Armor penetration +10%\n3. Magic penetration +10%\nYour choice: ");
 		switch (rune3)
 		{
 		case 1:
@@ -44,10 +44,10 @@ void chooseRune(Entities* player)
 			player->armor = player->baseAR, player->magicRes = player->baseMR;
 			break;
 		case 2:
-			player->ARpen = 5;
+			player->ARpen += 10;
 			break;
 		default:
-			player->MRpen = 5;
+			player->MRpen += 10;
 			break;
 		}
 		rune1 > 3 ? rune1 = 3 : rune1, rune2 > 3 ? rune2 = 3 : rune2, rune3 > 3 ? rune3 = 3 : rune3;
@@ -112,42 +112,47 @@ void chooseRune(Entities* player)
 			player->reincarnation = true;
 			break;
 		case 2: case 5: case 10: case 7:
-			player->range != 6 && player->range != 7 ? printf("HP +150 / Mana +2 / Resistance +50 / Cooper Seal") : printf("HP +150 / Mana +2 / Resistance +10 / Reincarnation");
+			player->range != 7 ? printf("HP +150 / Mana +2 / Resistance +50 / Cooper Seal") : printf("HP +150 / Mana +2 / Magic penetration +10% / Reincarnation");
 			player->maxHealth += 150, player->health += 150;
 			player->mana += 2;
-			player->baseAR += 10, player->baseMR += 10;
-			player->armor += 50, player->magicRes += 50;
-			player->range != 6 && player->range != 7 ? player->cooperSeal = true : player->reincarnation = true;
+			if (player->range == 7) player->MRpen += 10;
+			else
+			{
+				player->baseAR += 50, player->baseMR += 50;
+				player->armor += 50, player->magicRes += 50;
+			}
+			player->range != 7 ? player->cooperSeal = true : player->reincarnation = true;
 			break;
 		case 3:
-			printf("ATK +30 / Crit chance +10% / Armor penetration +5% / Exploit Weaknesses");
+			printf("ATK +30 / Crit chance +10% / Armor penetration +10% / Exploit Weaknesses");
 			player->baseAD += 30, player->attackDmg += 30;
-			player->critUp += 10, player->ARpen += 5;
+			player->critUp += 10, player->ARpen += 10;
 			player->exploit = true;
 			break;
 		case 4:
-			printf("ATK +50 / Mana +2 / Magic penetration +5% / Deathmatch");
+			printf("ATK +50 / Mana +2 / Magic penetration +10% / Deathmatch");
 			player->baseAP += 50, player->abilityPower += 50;
-			player->mana += 2, player->MRpen += 5;
+			player->mana += 2, player->MRpen += 10;
 			player->deathmatch = true;
 			break;
 		case 6:
-			printf("ATK +30 / Mana +2 / Armor penetration +5% / Insult to the Injury");
+			printf("ATK +30 / Mana +2 / Armor penetration +10% / Insult to the Injury");
 			player->baseAD += 30, player->attackDmg += 30;
+			player->ARpen += 10;
 			player->mana += 2;
 			player->insult = true;
 			break;
 		case 8:
-			printf("ATK +60 / Armor penetration +5% / Exploit Weaknesses");
+			printf("ATK +60 / Armor penetration +10% / Exploit Weaknesses");
 			player->baseAD += 60, player->attackDmg += 60;
-			player->ARpen += 5;
+			player->ARpen += 10;
 			player->exploit = true;
 			break;
 		case 9:
-			printf("HP +150 / Mana +2 / Armor penetration +5% / Cooper Seal");
+			printf("HP +150 / Mana +2 / Armor penetration +10% / Cooper Seal");
 			player->maxHealth += 150, player->health += 150;
 			player->mana += 2;
-			player->ARpen += 5;
+			player->ARpen += 10;
 			player->cooperSeal = true;
 			break;
 		case 11:
@@ -220,9 +225,10 @@ void diaryProgress()
 		if (i < 3) printf(".");
 	}
 	std::cout << std::endl;
+	system("cls");
 	setColor(14);
 	std::cout << "\n<<--------------------------DIARY OPENED!-------------------------->>\n", setColor(6);
-	std::cout << "A small notebook was found slightly burnt in the corner of an abandoned house. It contains ones past.\nThough some pages are still missing and somewhat hard to read, recollecting it may still be doable.\nHowever, doing so requires a decent amount of knowledge and certain combat experience.\nProve that you're worthy, and you can perhaps reach to its true value...\n", setColor(7);
+	std::cout << "A small notebook was found slightly burnt in the corner of an abandoned house. It contains ones past.\nThough some pages are still missing and somewhat hard to read, it isn't completely impossible to recognize what the inner content referring to.\nHowever, doing so requires a decent amount of knowledge and certain combat experience.\nProve that you're worthy, and you can perhaps reach to its true value...\n", setColor(7);
 
 diaryList:
 	reduceManaRequirement = false;
@@ -265,12 +271,12 @@ diaryList:
 			diaryName += unlockedDiary3 ? "Unexplained Fever" : "Unnamed diary #3";
 			break;
 		case 4:
-			diaryName += unlockedDiary4 ? "Winterwind" : "? ? ?";
+			diaryName += unlockedDiary4 ? "blade" : "? ? ?";
 			break;
 		}
 	}
 	diaryName += "\nX. Return to main menu\nYour choice: ";
-	setColor(7);
+	setColor(LI_CIRNO);
 	std::cout << diaryName;
 	setColor(LI_GREEN);
 	std::cin >> diarySelect;
@@ -671,7 +677,7 @@ diaryList:
 			std::cout << intro[i];
 		}
 		std::string diary;
-		diary += "\nJust who is this guy?\nHe suddenly showed up out from nowhere, marching into own town, by all himself alone.\nMore importantly, what are those negative thoughts surrounding my head? That could be anyone, it's really commonsense for someone to come into this town.\nYet, I still couldn't think straight, something feels really odd here.\n";
+		diary += "\nJust who is this guy?\nHe suddenly showed up out from nowhere, marching into our town, by all himself alone.\nMore importantly, what are these negative thoughts surrounding my head? That could be anyone, it's really commonsense for someone to come into this town.\nYet, I still couldn't think straight, something feels really odd here.\n";
 		diary += "That eerie omnious vines omitting from him makes me feel uncomfortable. And, somehow, I can tell that he's definietly up to no good.\n";
 		diary += "\nAs he walking closer, I started to see him more clearly.\nAppear in a black custom, wearing mask, carrying a blade, all of this properties, could only lead to one possibility.\nHowever, however, by all means, I hope it isn't true, I hope it isn't...\nOne of the most terrifying force of the military,\nthat guy, is not doubt, ";
 		diary += "an \"Emperors' Blade\"\n";
@@ -679,7 +685,9 @@ diaryList:
 		diary += "That red scar running along their spine, not too massive, but not too hard to notice its existence, indicates one thing:\n";
 		diary += "He is one of the survivors on the battlefield called \"Valley of the Setting Sun\", a battle that killed many other \"Emperors' Blade\".\nHe's also referred as ";
 		diary += "\"The Pursuer\".";
-		diary += "\nNot many people know this, and also don't concern why I know this.\nEven though I want to tell you, I'm afraid my time has run out.\nWherever \"Emperors' Blade\" set their foot to, they bring nothing but deaths and annhilations.\nYep, this town is pretty much screwed up already.\n\n";
+		diary += "\nNot many people know this, and also don't concern why I know this.\nEven though I want to tell you, I'm afraid my time has run out.\nWherever \"Emperors' Blade\" set their foot upon, they bring nothing but deaths and annhilations.\nJudging on events happened recently, it's not so surprise for this town to be condemned as \"haunted\", \"contaiminated\", \"crused\" and thus, giving it an \"purification\", which is formerly known as \"complete annihilation\" is considered essential.\n\n";
+		diary += "As the verdict has been set off, no one could disobey. Should they ever have the urge to do so, awaits them is something far scarier than just 'death'.\n\"Forgive me for this!\" - The Bladewielder says, as his sword points towards the vast sky.\nI let the chill sending down my spine, for the last time. I 'write' these thoughts down this piece of paper, for the last time.\n";
+		diary += "\nSuch a scenery, severally dotted by falling snow.\n\nBeing able to see thing like this, isn't half-bad either.\n";
 		for (int i = 0; i < std::size(diary); i++)
 		{
 			if (!skippin)
@@ -689,7 +697,7 @@ diaryList:
 				else Sleep(25);
 			}
 
-			if ((i >= 334 && i <= 335 + 131) || (i >= 335 + 135 + 326 - 7 && i <= 335 + 135 + 326 - 7 + 20) || (i >= 335 + 135 + 326 - 7 + 20 + 258 + 122 && i <= 335 + 135 + 326 - 7 + 20 + 258 + 122 + 156 + 13))
+			if ((i >= 334 && i <= 335 + 131) || (i >= 335 + 135 + 326 - 7 && i <= 335 + 135 + 326 - 7 + 20) || (i >= 335 + 135 + 326 - 7 + 20 + 258 + 122 && i <= 335 + 135 + 326 - 7 + 20 + 258 + 122 + 156 + 13) || (i >= 335 + 135 + 326 - 7 + 20 + 258 + 122 + 156 + 13 + 473 + 370))
 			{
 				setColor(14);
 			}
@@ -740,15 +748,14 @@ diaryList:
 		{
 			std::string des = "\nAnd so on, there was really nothing left.\nAnd so on, that whole town has been completely whipped off within just a day.\nOnes who feared, ones who resisted, ones who tried to escape, all of their effort were equally worthless afterall.\nNone could withstand, against the true aberrance of pure strength.\nNone could withstand, against the one whose blade stained crimson.\n\nAnother winter has come, broken, yet harrowing.\nScorched diary, can no longer be written.\n";
 			des += "Snowfall, Blackening the Earth.";
-			std::string cond = "\n\nConditions:\n- Fixed squad: Player units are settled: Minh Phan, Duong Le, Phong Vinh\n- Emergency Reinforcement: Player is allowed to have their second squad - Alter Vinh, Maskman, Defender.\n- When an allied unit in the main squad is knocked down, an unit in the second squad with proportional position will replace them to continue fighting\n- All player units gain +200 Armor and +100 AD. Substitute units also gain +3 initial mana\n- Enemy unit: \"Emperors' Blade\"\n- \"Emperors' Blade\" starts the battle in \"Pursuer Form\"\n- The %HP threshold to apply 'Fragile' increases to 65%\n- Available runes (main squad): Duong Le - Exploit Weaknesses, Minh Phan - Reincarnation, Phong Vinh - Cooper Seal.\n- Available runes (backup squad): Maskman - Exploit Weaknesses, Alter Vinh - Reincarnation, Defender - Cooper Seal\n\n";
+			std::string cond = "\n\nConditions:\n- Fixed squad: Player units are settled: Minh Phan, Duong Le, Phong Vinh\n- Emergency Reinforcement: Player is allowed to have their second squad - Alter Vinh, Maskman, Defender.\n- When an allied unit in the main squad is knocked down, an unit in the second squad with proportional position will replace them to continue fighting\n- All player units gain +200 Resistances and +100 AD. Substitute units also gain +3 initial mana\n- Enemy unit: \"Emperors' Blade\"\n- \"Emperors' Blade\" starts the battle in \"Pursuer Form\"\n- Available runes (main squad): Duong Le - Exploit Weaknesses, Minh Phan - Reincarnation, Phong Vinh - Cooper Seal.\n- Available runes (backup squad): Maskman - Exploit Weaknesses, Alter Vinh - Reincarnation, Defender - Cooper Seal\n\n";
 			setColor(8);
 			Sleep(2000);
 			for (int i = 0; i < std::size(des); i++)
 			{
 				Sleep(25);
-				if (i > 462) Sleep(55);
-				if (i > 0 && (des[i - 1] == '\n' || des[i - 1] == '.')) Sleep(950);
-				else if (i > 0 && des[i - 1] == ',') Sleep(650);
+				if (i > 0 && (des[i - 1] == '\n' || des[i - 1] == '.')) Sleep(650);
+				else if (i > 0 && des[i - 1] == ',') Sleep(450);
 				std::cout << des[i];
 			}
 			Sleep(2000);
@@ -760,18 +767,23 @@ diaryList:
 			Entities enemy1 = createBlade(0), enemy2 = createBlankTarget(), enemy3 = createBlankTarget();
 			player1.baseAR += 200, player2.baseAR += 200, player3.baseAR += 200;
 			player1.armor += 200, player2.armor += 200, player3.armor += 200;
+			player1.baseMR += 200, player2.baseMR += 200, player3.baseMR += 200;
+			player1.magicRes += 200, player2.magicRes += 200, player3.magicRes += 200;
 			player1.baseAD += 100, player2.baseAD += 100, player3.baseAD += 100;
 			player1.attackDmg += 100, player2.attackDmg += 100, player3.attackDmg += 100;
 			player2.exploit = true, player1.reincarnation = true, player3.cooperSeal = true;
 			enemy1.armor += 222, enemy1.magicRes += 200, enemy1.attackDmg += 200, enemy1.baseAD += 200;
 			enemy1.maxHealth = 21500, enemy1.health = 21500;
 			enemy1.role = "Emperors' Blade - The Pursuer";
+			enemy1.trait = "He once ravaged the demons of the Northern Tundra, segregating the outsiders beyond the reach of civilization; His blade shies not from royals nor nobles, safeguarding glory from the dusts of rebellion. Every Royal Guard is as a dominion; the land beneath their feet is all the territory of their emperor's kingdom.";
+			enemy1.trait += "\nSet the Stage: First attack instead casts \"Collapsing Fear\" with increased damage, can only happen once.\nDominion: All allied units are permanently inflicted with 60% 'Grievous Wound'. Attack ignores a certain amount of defense, each attack permanently increases this unit's ATK, up to a total of 5 times.\nUnrelenting Conqueror: Attacks against target with less than 50% HP applies \"Fragile\" on them. Damage is increased dramatically when attack 'Fragile' target.\n\nThe first time HP drops to 0, immediately recovers all HP and enters \"Pursuer\" phase, gains greatly increased stats and resets \"Sett the Stage\".\nDuring \"Pursuer\" phase, \"Collapsing Fear\" can be casted periodically and attacks check its target's HP to apply 'Fragile' an additional time, after they have received the damage.\n\"Collapsing Fear\": Dealing magic damage to all allied units once, ignores damage reduction effect and refreshes \"Grievous Wound\" debuff on them beforehand.\n";
 			PlaySound(NULL, NULL, NULL);
 			setColor(12);
-			std::cout << "\nWarning: The difficulty of this operation is extremely high, proceed with caution!\n";
+			std::cout << "\nWarning: The difficulty of this operation is extremely high, keep calm and don't rage quit!\n";
 			setColor(7);
 			Sleep(2000);
-			PlaySound(TEXT("ost\\emblade_extra.wav"), NULL, SND_ASYNC | SND_LOOP);
+			if (std::filesystem::exists("ost\\sacrifice.wav")) PlaySound(TEXT("ost\\sacrifice.wav"), NULL, SND_ASYNC | SND_LOOP);
+			else PlaySound(TEXT("ost\\emblade.wav"), NULL, SND_ASYNC | SND_LOOP);
 			proceedOperation = true;
 			recollectOpStart = true;
 			battleStart_3v3(&player1, &player2, &player3, &enemy1, &enemy2, &enemy3);
@@ -795,18 +807,28 @@ void storyModeStart()
 	std::fstream getStoryData("saves\\story.dat");
 	std::string storyProgess;
 	getStoryData >> storyProgess;
-	if (storyProgess == " " || !std::filesystem::exists("saves\\story.dat"))
+	setColor(GRAY);
+	std::cout << "\nChoose stage:\n";
+	std::vector<std::vector<std::string>> stageList =
 	{
-		std::cout << "\nWhoosp! Look like you haven't stored any progess on this mode yet. Perhaps you're new here, I'll give you a brief introduction about this mode.\n";
-		system("pause");
-		std::cout << "\nSee that message above? It's kinda annoying and won't fit for displaying character's dialogues, right?\n";
-		Sleep(3000);
-		printf("So, from now on, the aforementioned notification will be disabled, and you need to figure out when to continue by yourself..\n");
-		_getch();
-		printf("Well done, now you've learnt how story mode works.");
-		_getch();
-		printf("\nWhat happens next is up to you, good luck!");
-		_getch();
+		{"Sunrise", "Daybreak", "Phenomenon", "Harm", "A Look that Kills"},
+		{"Moonfall", "Marching in the Dead of Night", "Ambush", "Glancing Flare"}
+	};
+	for (int i = 0; i < stageList.size(); i++)
+	{
+		for (int j = 0; j < stageList[i].size(); j++)
+		{
+			if (j == 0)
+			{
+				setColor(LI_YELLOW);
+				std::cout << "\nChapter " << i + 1 << ". " << stageList[i][j] << "\n\n";
+			}
+			else
+			{
+				setColor(GRAY);
+				std::cout << "Stage " << i + 1 << "-" << j << ": " << stageList[i][j] << "\n";
+			}
+		}
 	}
 }
 
@@ -814,24 +836,57 @@ void gameStart()
 {
 	short modoChoice;
 	setColor(12);
-	std::cout << "\nSelect combat mode:\n1. Solo\n2. 3v3-Custom: Feel free to choose your units and enemies\n3. 3v3-Packed mode: Enemies units are locked and can not be changed, but you can experience enemies that can not be challenged normally\n4. 3v3 - Tower mode: Starts off normally, but wait, why do these enemies keep spawning...\n???. Stay tune, something wicked this way comes...\nYour choice: ";
+	std::cout << "\nSelect combat mode:\n1. Solo\n2. 3v3 - Custom: Feel free to choose your units and enemies\n3. 3v3 - Packed mode: Enemies units are locked and can not be changed, but you can experience enemies that can not be challenged normally\n4. 3v3 - Imitator mode: Only have to deal with a certain kind of weak enemies, what can be so hard 'bout that?\n5. Return to menu\nYour choice: ";
 	setColor(11);
 	std::cin >> modoChoice;
 
-	while (std::cin.fail() || modoChoice > 4 || modoChoice < 1)
+	while (std::cin.fail() || modoChoice > 5 || modoChoice < 1)
 	{
 		std::cin.clear();
 		std::cin.ignore();
 		setColor(12);
-		std::cout << "\nInvalid input! Recommend trying again";
-		std::cout << "\nSelect combat mode:\n1. Solo\n2. 3v3-Custom: Feel free to choose your units and enemies\n3. 3v3-Packed mode: Enemies units are locked and can not be changed, but you can experience enemies that can not be challenged normally\n4. 3v3 - Tower mode: Starts off normally, but wait, why do these enemies keep spawning...\n???. Stay tune, something wicked this way comes...\nYour choice: ";
+		std::cout << "\nInvalid input! Recommend trying again\n";
+		std::cout << "\nSelect combat mode:\n1. Solo\n2. 3v3 - Custom: Feel free to choose your units and enemies\n3. 3v3 - Packed mode: Enemies units are locked and can not be changed, but you can experience enemies that can not be challenged normally\n4. 3v3 - Imitator mode: Only have to deal with a certain kind of weak enemies, what can be so hard 'bout that?\n5. Return to menu\nYour choice: ";
 		setColor(LI_CIRNO);
 		std::cin >> modoChoice;
 	}
 
-
-	if (modoChoice != 5)
+	if (modoChoice == 6) storyModeStart();
+	else if (modoChoice != 5)
 	{
+		PlaySound(NULL, NULL, NULL);
+		setColor(GRAY);
+		std::cout << "\nSetting up the stage...\n", setColor(WHITE);
+		Sleep(2000);
+		if (modoChoice == 4)
+		{
+			PlaySound(TEXT("ost\\imi_select.wav"), NULL, SND_ASYNC | SND_LOOP);
+		}
+		else
+		{
+			PlaySound(TEXT("ost\\corrosion.wav"), NULL, SND_ASYNC | SND_LOOP);
+			Sleep(1000);
+		}
+		system("cls");
+		setColor(RED);
+		switch (modoChoice)
+		{
+		case 1:
+			std::cout << "\"One-on-one, a solid deathmatch has been set in motion.\nIn a battle where the stronger is the strongest, can you prove yourself?\"\n";
+			break;
+		case 2:
+			std::cout << "\"Ah, free-style battle! My favourite\"\n";
+			break;
+		case 3:
+			std::cout << "\"Limited possibilities is suck, but at least it's worth the price!\"\n";
+			break;
+		default:
+			std::cout << "\"Take 'em down one after another, fast and accurate\"\n";
+			break;
+		}
+
+		Sleep(1000);
+
 		if (modoChoice == 4)
 		{
 			modoChoice = 2;
@@ -840,13 +895,19 @@ void gameStart()
 
 		if (modoChoice > 5 || modoChoice <= 0) return;
 
-		setColor(7);
+		setColor(GRAY);
+		if (modoChoice != 1) printf("\nFirst unit");
 		Entities player = createSoldier(), player2 = createBlankTarget(), player3 = createBlankTarget();
 		Entities enemy = createBlankTarget(), enemy2 = createBlankTarget(), enemy3 = createBlankTarget();
 
 		if (modoChoice != 1)
 		{
-			player2 = createSoldier(); player3 = createSoldier();
+			setColor(GRAY);
+			std::cout << "\nSecond unit";
+			player2 = createSoldier(); 
+			setColor(GRAY);
+			std::cout << "\nThird unit";
+			player3 = createSoldier();
 			while (player.range == player2.range || player2.range == player3.range || player.range == player3.range)
 			{
 				std::cout << "\nDO NOT choose existed role, nigga!\nNow choose again from the 2nd unit.\n";
@@ -858,17 +919,17 @@ void gameStart()
 
 		if (modoChoice == 3)
 		{
-			std::vector<std::string> packList = { "The goblins incident", "Waiting game", "Shattering Force", "Phantom of the Night", "Deaf to all but the Song", "March of the Undeads", "[Boss fight] \"As the Empier's Shadow\"", "[Boss fight] \"Free Will\"" };
+			std::vector<std::string> packList = { "The goblins incident", "Waiting game", "Shattering Force", "Phantom of the Night", "Deaf to all but the Song", "March of the Undeads", "[Boss fight] \"As the Empier's Shadow\"", "[Boss fight] \"Free Will\"", "Ancient Trio" };
 			std::fstream data("saves\\data.dat");
 			if (data.peek() == ' ' || data.peek() == EOF)
 			{
 				std::ofstream createFile("saves\\data.dat");
-				std::string addData = "PX";
+				std::string addData = "DATA_STORAGE_STAGE_X";
 				for (int j = 1; j <= std::size(packList); j++)
 				{
-					addData[1] = j + '0';
+					addData[20] = j + '0';
 					createFile << addData;
-					if (j < 7) createFile << '\n';
+					if (j < packList.size()) createFile << '\n';
 				}
 				createFile.close();
 			}
@@ -989,11 +1050,18 @@ void gameStart()
 			case 8:
 				enemy = createEssence(1), enemy2 = createBlankTarget(), enemy3 = createBlankTarget();
 				break;
+			case 9 :
+				enemy = createPhaCleaver(0), enemy2 = createPhaShooter(0), enemy3 = createPhaPioneer(0);
+				break;
 			}
 			setColor(12);
 			if (pack != 7 && pack != 8) { std::cout << "\nEnemy combination: " << enemy.role << " / " << enemy2.role << " / " << enemy3.role << '\n'; }
 			else std::cout << "\nElite enemy detected, proceed with caution!\n";
 			setColor(7);
+		}
+		else if (towerMode)
+		{
+			enemy = createSwarm(), enemy2 = createSwarm(), enemy3 = createSwarm();
 		}
 		else
 		{
@@ -1137,229 +1205,241 @@ void gameStart()
 				free(currentEnemy);
 			}
 		}
-		system("pause");
-
-		int challMod = avoidRetardInput("\nBattle mode:\n1. Stay simple\n2. Challenge Mode\n3. Tribulation Mode\nYour choice: ");
-		if (challMod == 1) std::cout << "\nNormal mode selected!\n";
-		else
+		
+		if (!towerMode)
 		{
-			enemy.challengeMode = true;
-			enemy2.challengeMode = true;
-			enemy3.challengeMode = true;
-			std::cout << "\nChallenge Mode selected!\n\n";
-			setColor(12);
-			for (int i = 0; i < modoChoice; i++)
+			system("pause");
+			int challMod = avoidRetardInput("\nBattle mode:\n1. Stay simple\n2. Challenge Mode\n3. Tribulation Mode\nYour choice: ");
+			if (challMod == 1) std::cout << "\nNormal mode selected!\n";
+			else
 			{
-				Entities* currentEnemy = nullptr;
-				i == 0 ? currentEnemy = &enemy : i == 1 ? currentEnemy = &enemy2 : currentEnemy = &enemy3;
-				if (currentEnemy->role != "Dummy" && currentEnemy->role != "blank") std::cout << currentEnemy->role << " - ";
-				switch (currentEnemy->range)
+				enemy.challengeMode = true;
+				enemy2.challengeMode = true;
+				enemy3.challengeMode = true;
+				std::cout << "\nChallenge Mode selected!\n\n";
+				setColor(12);
+				for (int i = 0; i < 3; i++)
 				{
-				case 55:
-					std::cout << "Undead the Undying: Zombified Orc no longer loses HP and resistances overtime!\n";
-					break;
-				case 56:
-					std::cout << "Swift Action: Dwarft has significantly increased dodge & graze chance and bonus damage\n";
-					break;
-				case 57:
-					std::cout << "Shell Defense: Slug's bonus armor, magic resist and attack damage from passive increased even greater.\n";
-					currentEnemy->armor += 500;
-					currentEnemy->magicRes += 500;
-					break;
-				case 58:
-				{
-					std::cout << "Specter: Phantom possesses up to 2 separate talents!\n";
-					int talent = rand() % (9 - 1 + 1) + 1;
-					currentEnemy->possessTalent2 = talent;
-					if (currentEnemy->possessTalent == currentEnemy->possessTalent2 && currentEnemy->possessTalent < 9)
-					{
-						currentEnemy->possessTalent2++;
-						talent++;
-					}
-					else if (currentEnemy->possessTalent == currentEnemy->possessTalent2)
-					{
-						currentEnemy->possessTalent2--;
-						talent--;
-					}
-					setColor(12);
-					std::cout << "Talent 2 possessed: ";
-					setColor(5);
-					switch (talent)
-					{
-					case 1:
-						std::cout << "After every turn, increases self ATK by 20 and subtracts opponent's armor by 5";
-						break;
-					case 2:
-						std::cout << "After being injured, reflects (20 + 30% armor) magic damage to the attacker";
-						break;
-					case 3:
-						std::cout << "Increases crit chance by 50%, this unit also gains 10% life steal";
-						currentEnemy->omniVamp = 10;
-						break;
-					case 4:
-						std::cout << "Gains 300 ability power";
-						currentEnemy->abilityPower += 300;
-						break;
-					case 5:
-						std::cout << "Once in the battle, when HP drops to 0, restores 1000 + 100% damage taken HP";
-						enemy.emergencyOn = true;
-						break;
-					case 6:
-						std::cout << "Attack receives one of these following buff: Deals 150% true damage, restores 7% HP or decreases target's mana by 1";
-						break;
-					case 7:
-						std::cout << "Damage taken is reduced by 15%";
-						break;
-					case 9:
-						std::cout << "Gains 2 shields at the start of battle and 1 shield every 5 turns. Each shield can block 1 instance of damage. When a shield breaks, restores 10% HP";
-						currentEnemy->shield = 2;
-						break;
-					case 8:
-						std::cout << "After every turn, generates 1 Moon Blade (stores up to 2), each Moon Blade increases crit chance by 7%. Whenever this unit attacks, attacks an additional with each Moon Blade owns.";
-						break;
-					}
-					setColor(12);
-					printf("\n");
-					break;
-				}
-				case 59:
-					std::cout << "Hateful Spirit: Mana consumption increases to 8, healing increases to 1333 HP\n";
-					break;
-				case 60:
-					std::cout << "Brodifacoum: Poison deals 150% damage and deals at least 300 damage, regardless of target's magic resist\n";
-					break;
-				case 61:
-					std::cout << "Hymn of Battle: All enemy units ATK +50%\n";
-					break;
-				case 62:
-					std::cout << "Bounty Harvest: Reaper has -25% ATK, but will always perform AoE attack\n";
-					currentEnemy->attackDmg = currentEnemy->attackDmg * 3 / 4;
-					break;
-				case 63:
-					std::cout << "Rule Breaker: Player units can no longer skip their turns\n";
-					break;
-				case 64: case 65:
-					std::cout << "Enjoyment, even in Death: " << currentEnemy->role << " gains 3 layers of 'Shield' and won't naturally lose HP in the first 3 turns of battle\n";
-					currentEnemy->shield = 3;
-					break;
-				case 66:
-					std::cout << "Unyielding Shield: Other enemies gains bonus armor equals 20% of this unit's armor\n";
-					enemy.armor += currentEnemy->armor / 5;
-					enemy2.armor += currentEnemy->armor / 5;
-					enemy3.armor += currentEnemy->armor / 5;
-					break;
-				case 100:
-					std::cout << "Remember the Beast: Chimera has greatly increased HP and attack instead deals true damage\n";
-					currentEnemy->health += 5000;
-					currentEnemy->maxHealth += 5000;
-					break;
-				case 101:
-					std::cout << "Corrupting Domination: Upon entering \"Pursuer\" state, summons \"Corrupted Bladeweaver\" and \"Corrupted Worldcurser\" to assist in combat";
-					break;
-				case 150:
-					std::cout << "Witness true Evolution: During \"Evolution\" form, this unit regenerate its HP. During \"Perfect\" form, this unit loses HP at a decreased rate and becomes \"Low-altitude Hovering\"";
-					break;
-				default:
+					Entities* currentEnemy = nullptr;
+					i == 0 ? currentEnemy = &enemy : i == 1 ? currentEnemy = &enemy2 : currentEnemy = &enemy3;
 					if (currentEnemy->role != "Dummy" && currentEnemy->role != "blank")
 					{
-						std::cout << "This enemy has their basic stats increases by 150, HP increased by 2000\n";
-						currentEnemy->abilityPower < currentEnemy->attackDmg ? currentEnemy->baseAD += 150, currentEnemy->attackDmg += 150 : currentEnemy->baseAP += 150, currentEnemy->abilityPower += 150;
-						currentEnemy->armor += 150, currentEnemy->baseAR += 150, currentEnemy->baseMR += 150, currentEnemy->magicRes += 150;
-						currentEnemy->maxHealth += 2000, currentEnemy->health += 2000;
+						if (currentEnemy->range != -100 || (currentEnemy->range == -100 && !i)) std::cout << currentEnemy->role << " - ";
 					}
-					break;
+					switch (currentEnemy->range)
+					{
+					case -100:
+						if (towerMode && !i) std::cout << "Coalescing Fear: Tends to transform into more dangerous enemies right from the first transformation, and all transformed enemies have their special abilities activated!\n";
+						break;
+					case 55:
+						std::cout << "Undead the Undying: Zombified Orc no longer loses HP and resistances overtime!\n";
+						break;
+					case 56:
+						std::cout << "Swift Action: Dwarft has significantly increased dodge & graze chance and bonus damage\n";
+						break;
+					case 57:
+						std::cout << "Shell Defense: Slug's bonus armor, magic resist and attack damage from passive increased even greater.\n";
+						break;
+					case 58:
+					{
+						std::cout << "Specter: Phantom possesses up to 2 separate talents!\n";
+						int talent = rand() % (9 - 1 + 1) + 1;
+						currentEnemy->possessTalent2 = talent;
+						if (currentEnemy->possessTalent == currentEnemy->possessTalent2 && currentEnemy->possessTalent < 9)
+						{
+							currentEnemy->possessTalent2++;
+							talent++;
+						}
+						else if (currentEnemy->possessTalent == currentEnemy->possessTalent2)
+						{
+							currentEnemy->possessTalent2--;
+							talent--;
+						}
+						setColor(12);
+						std::cout << "Talent 2 possessed: ";
+						setColor(5);
+						switch (talent)
+						{
+						case 1:
+							std::cout << "After every turn, increases self ATK by 20 and subtracts opponent's armor by 5";
+							break;
+						case 2:
+							std::cout << "After being injured, reflects (20 + 30% armor) magic damage to the attacker";
+							break;
+						case 3:
+							std::cout << "Increases crit chance by 50%, this unit also gains 10% life steal";
+							currentEnemy->omniVamp = 10;
+							break;
+						case 4:
+							std::cout << "Gains 300 ability power";
+							currentEnemy->abilityPower += 300;
+							break;
+						case 5:
+							std::cout << "Once in the battle, when HP drops to 0, restores 1000 + 100% damage taken HP";
+							enemy.emergencyOn = true;
+							break;
+						case 6:
+							std::cout << "Attack receives one of these following buff: Deals 150% true damage, restores 7% HP or decreases target's mana by 1";
+							break;
+						case 7:
+							std::cout << "Damage taken is reduced by 15%";
+							break;
+						case 9:
+							std::cout << "Gains 2 shields at the start of battle and 1 shield every 5 turns. Each shield can block 1 instance of damage. When a shield breaks, restores 10% HP";
+							currentEnemy->shield = 2;
+							break;
+						case 8:
+							std::cout << "After every turn, generates 1 Moon Blade (stores up to 2), each Moon Blade increases crit chance by 7%. Whenever this unit attacks, attacks an additional with each Moon Blade owns.";
+							break;
+						}
+						setColor(12);
+						printf("\n");
+						break;
+					}
+					case 59:
+						std::cout << "Hateful Spirit: Mana consumption increases to 8, healing increases to 1333 HP\n";
+						break;
+					case 60:
+						std::cout << "Brodifacoum: Poison deals 150% damage and deals at least 300 damage, regardless of target's magic resist\n";
+						break;
+					case 61:
+						std::cout << "Hymn of Battle: All enemy units ATK +50%\n";
+						break;
+					case 62:
+						std::cout << "Bounty Harvest: Reaper has -25% ATK, but will always perform AoE attack\n";
+						currentEnemy->attackDmg = currentEnemy->attackDmg * 3 / 4;
+						break;
+					case 63:
+						std::cout << "Rule Breaker: Player units can no longer skip their turns\n";
+						break;
+					case 64: case 65:
+						std::cout << "Enjoyment, even in Death: " << currentEnemy->role << " gains 3 layers of 'Shield' and won't naturally lose HP while the shield presists\n";
+						currentEnemy->shield = 3;
+						break;
+					case 66:
+						std::cout << "Unyielding Shield: Other enemies gains bonus armor equals 20% of this unit's armor\n";
+						enemy.armor += currentEnemy->armor / 5;
+						enemy2.armor += currentEnemy->armor / 5;
+						enemy3.armor += currentEnemy->armor / 5;
+						break;
+					case 100:
+						std::cout << "Remember the Beast: Chimera has greatly increased HP and attack instead deals true damage\n";
+						currentEnemy->health += 5000;
+						currentEnemy->maxHealth += 5000;
+						break;
+					case 101:
+						std::cout << "Corrupting Domination: Upon entering \"Pursuer\" state, summons \"Corrupted Bladeweaver\" and \"Corrupted Worldcurser\" to assist in combat. \"Collapsing Fear\" deals significantly increased damage";
+						break;
+					case 150:
+						std::cout << "Witness true Evolution: During \"Evolution\" form, this unit regenerate its HP. During \"Perfect\" form, this unit loses HP at a decreased rate and becomes \"Low-altitude Hovering\"";
+						break;
+					default:
+						if (currentEnemy->role != "Dummy" && currentEnemy->role != "blank")
+						{
+							std::cout << "This enemy has their basic stats increases by 150, HP increased by 2000\n";
+							currentEnemy->abilityPower < currentEnemy->attackDmg ? currentEnemy->baseAD += 150, currentEnemy->attackDmg += 150 : currentEnemy->baseAP += 150, currentEnemy->abilityPower += 150;
+							currentEnemy->armor += 150, currentEnemy->baseAR += 150, currentEnemy->baseMR += 150, currentEnemy->magicRes += 150;
+							currentEnemy->maxHealth += 2000, currentEnemy->health += 2000;
+						}
+						break;
+					}
+					currentEnemy->maxHealth += currentEnemy->maxHealth / 10;
+					currentEnemy->health = currentEnemy->maxHealth;
+					currentEnemy->attackDmg += currentEnemy->attackDmg / 10;
+					currentEnemy->abilityPower += currentEnemy->abilityPower / 10;
+					currentEnemy->baseAD = currentEnemy->attackDmg;
+					currentEnemy->baseAP = currentEnemy->abilityPower;
+					if (currentEnemy->range != -100 || (currentEnemy->range == -100 && !i)) printf("\n");
 				}
-				printf("\n");
-			}
 
-			if (challMod >= 3)
-			{
-				setColor(14);
-				printf("Select level of risk (between 1 - 5): ");
-				scanf_s("%i", &risk);
-				risk > 5 ? risk = 5 : risk < 1 ? risk = 1 : risk;
-				risk = 6 - risk;
-				std::cout << "Risk selected!\n", setColor(12);
-				switch (risk)
+				if (challMod >= 3)
 				{
-				case 1:
-				{
-					std::cout << "\nTactical Combat - Anti Armor II: All friendly units has -60% Resistances\n";
-					player.baseAR = player.baseAR * 4 / 10, player.armor = player.baseAR;
-					player.baseMR = player.baseMR * 4 / 10, player.magicRes = player.baseMR;
-					if (modoChoice != 1)
+					setColor(14);
+					printf("Select level of risk (between 1 - 5): ");
+					scanf_s("%i", &risk);
+					risk > 5 ? risk = 5 : risk < 1 ? risk = 1 : risk;
+					risk = 6 - risk;
+					std::cout << "Risk selected!\n", setColor(12);
+					switch (risk)
 					{
-						player2.baseAR = player2.baseAR * 4 / 10, player2.armor = player2.baseAR;
-						player2.baseMR = player2.baseMR * 4 / 10, player2.magicRes = player2.baseMR;
-						player3.baseAR = player3.baseAR * 4 / 10, player3.armor = player3.baseAR;
-						player3.baseMR = player3.baseMR * 4 / 10, player3.magicRes = player3.baseMR;
-					}
-				}
-				case 2:
-				{
-					if (risk >= 2)
+					case 1:
 					{
-						std::cout << "\nTactical Combat - Anti Armor I: All friendly units has -30% Resistances\n";
-						player.baseAR = player.baseAR * 7 / 10, player.armor = player.baseAR;
-						player.baseMR = player.baseMR * 7 / 10, player.magicRes = player.baseMR;
+						std::cout << "\nTactical Combat - Anti Armor II: All friendly units has -60% Resistances\n";
+						player.baseAR = player.baseAR * 4 / 10, player.armor = player.baseAR;
+						player.baseMR = player.baseMR * 4 / 10, player.magicRes = player.baseMR;
 						if (modoChoice != 1)
 						{
-							player2.baseAR = player2.baseAR * 7 / 10, player2.armor = player2.baseAR;
-							player2.baseMR = player2.baseMR * 7 / 10, player2.magicRes = player2.baseMR;
-							player3.baseAR = player3.baseAR * 7 / 10, player3.armor = player3.baseAR;
-							player3.baseMR = player3.baseMR * 7 / 10, player3.magicRes = player3.baseMR;
+							player2.baseAR = player2.baseAR * 4 / 10, player2.armor = player2.baseAR;
+							player2.baseMR = player2.baseMR * 4 / 10, player2.magicRes = player2.baseMR;
+							player3.baseAR = player3.baseAR * 4 / 10, player3.armor = player3.baseAR;
+							player3.baseMR = player3.baseMR * 4 / 10, player3.magicRes = player3.baseMR;
 						}
 					}
-				}
-				case 3:
-					std::cout << "\nOriginium Zone - Activation: All friendly unit has -50% max health\n";
-					player.maxHealth /= 2, player.health = player.maxHealth;
-					if (modoChoice != 1)
+					case 2:
 					{
-						player2.maxHealth /= 2, player2.health = player2.maxHealth;
-						player3.maxHealth /= 2, player3.health = player3.maxHealth;
+						if (risk >= 2)
+						{
+							std::cout << "\nTactical Combat - Anti Armor I: All friendly units has -30% Resistances\n";
+							player.baseAR = player.baseAR * 7 / 10, player.armor = player.baseAR;
+							player.baseMR = player.baseMR * 7 / 10, player.magicRes = player.baseMR;
+							if (modoChoice != 1)
+							{
+								player2.baseAR = player2.baseAR * 7 / 10, player2.armor = player2.baseAR;
+								player2.baseMR = player2.baseMR * 7 / 10, player2.magicRes = player2.baseMR;
+								player3.baseAR = player3.baseAR * 7 / 10, player3.armor = player3.baseAR;
+								player3.baseMR = player3.baseMR * 7 / 10, player3.magicRes = player3.baseMR;
+							}
+						}
 					}
-				case 4:
-				{
-					std::cout << "\nObjective - High Value Targets II: All friendly unit has -60% ATK and -15% Crit chance\n";
-					player.baseAD = player.baseAD * 4 / 10, player.attackDmg = player.baseAD;
-					player.baseAP = player.baseAP * 4 / 10, player.abilityPower = player.baseAP;
-					player.critUp -= 15;
-					if (modoChoice != 1)
-					{
-						player2.baseAD = player2.baseAD * 4 / 10, player2.attackDmg = player2.baseAD;
-						player2.baseAP = player2.baseAP * 4 / 10, player2.abilityPower = player2.baseAP;
-						player2.critUp -= 15, player3.critUp -= 15;
-						player3.baseAD = player3.baseAD * 4 / 10, player3.attackDmg = player3.baseAD;
-						player3.baseAP = player3.baseAP * 4 / 10, player3.abilityPower = player3.baseAP;
-					}
-				}
-				case 5:
-				{
-					if (risk >= 5)
-					{
-						std::cout << "\nObjective - High Value Targets I: All friendly unit has -25% ATK and -10% Crit chance\n";
-						player.baseAD = player.baseAD * 75 / 100, player.attackDmg = player.baseAD;
-						player.baseAP = player.baseAP * 75 / 100, player.abilityPower = player.baseAP;
-						player.critUp -= 10;
+					case 3:
+						std::cout << "\nOriginium Zone - Activation: All friendly unit has -50% max health\n";
+						player.maxHealth /= 2, player.health = player.maxHealth;
 						if (modoChoice != 1)
 						{
-							player2.baseAD = player2.baseAD * 75 / 100, player2.attackDmg = player2.baseAD;
-							player2.baseAP = player2.baseAP * 75 / 100, player2.abilityPower = player2.baseAP;
-							player2.critUp -= 10, player3.critUp -= 10;
-							player3.baseAD = player3.baseAD * 75 / 100, player3.attackDmg = player3.baseAD;
-							player3.baseAP = player3.baseAP * 75 / 100, player3.abilityPower = player3.baseAP;
+							player2.maxHealth /= 2, player2.health = player2.maxHealth;
+							player3.maxHealth /= 2, player3.health = player3.maxHealth;
+						}
+					case 4:
+					{
+						std::cout << "\nObjective - High Value Targets II: All friendly unit has -60% ATK and -15% Crit chance\n";
+						player.baseAD = player.baseAD * 4 / 10, player.attackDmg = player.baseAD;
+						player.baseAP = player.baseAP * 4 / 10, player.abilityPower = player.baseAP;
+						player.critUp -= 15;
+						if (modoChoice != 1)
+						{
+							player2.baseAD = player2.baseAD * 4 / 10, player2.attackDmg = player2.baseAD;
+							player2.baseAP = player2.baseAP * 4 / 10, player2.abilityPower = player2.baseAP;
+							player2.critUp -= 15, player3.critUp -= 15;
+							player3.baseAD = player3.baseAD * 4 / 10, player3.attackDmg = player3.baseAD;
+							player3.baseAP = player3.baseAP * 4 / 10, player3.abilityPower = player3.baseAP;
 						}
 					}
+					case 5:
+					{
+						if (risk >= 5)
+						{
+							std::cout << "\nObjective - High Value Targets I: All friendly unit has -25% ATK and -10% Crit chance\n";
+							player.baseAD = player.baseAD * 75 / 100, player.attackDmg = player.baseAD;
+							player.baseAP = player.baseAP * 75 / 100, player.abilityPower = player.baseAP;
+							player.critUp -= 10;
+							if (modoChoice != 1)
+							{
+								player2.baseAD = player2.baseAD * 75 / 100, player2.attackDmg = player2.baseAD;
+								player2.baseAP = player2.baseAP * 75 / 100, player2.abilityPower = player2.baseAP;
+								player2.critUp -= 10, player3.critUp -= 10;
+								player3.baseAD = player3.baseAD * 75 / 100, player3.attackDmg = player3.baseAD;
+								player3.baseAP = player3.baseAP * 75 / 100, player3.abilityPower = player3.baseAP;
+							}
+						}
+					}
+					}
+					setColor(6);
+					risk = 6 - risk;
+					std::cout << "\nRisk level: " << risk << "\n\n";
 				}
-				}
-				setColor(6);
-				risk = 6 - risk;
-				std::cout << "\nRisk level: " << risk << "\n\n";
+				setColor(7);
 			}
-			setColor(7);
 		}
-
 		if (modoChoice == 1)
 		{
 			chooseRune(&player);
@@ -1369,7 +1449,7 @@ void gameStart()
 		}
 		else
 		{
-			for (int i = 0; i < modoChoice; i++)
+			for (int i = 0; i < 3; i++)
 			{
 				Entities* runeChoose = nullptr;
 				i == 0 ? runeChoose = &player : i == 1 ? runeChoose = &player2 : runeChoose = &player3;
@@ -1403,15 +1483,24 @@ void gameStart()
 			else if (towerMode) {
 				PlaySound(NULL, NULL, NULL);
 				setColor(8);
-				std::cout << "Form-up, and get ready! Together, we'll fight alongside in the endless darkness!\n", setColor(7);
-				PlaySound(TEXT("ost\\exterminate.wav"), NULL, SND_ASYNC | SND_LOOP);
+				std::cout << "You don't know what tragedy you have committed...\n", setColor(7);
 				Sleep(2000);
+				PlaySound(TEXT("ost\\imi_early.wav"), NULL, SND_ASYNC | SND_LOOP);
+			}
+			else if (pack == 9)
+			{
+				PlaySound(NULL, NULL, NULL);
+				setColor(8);
+				std::cout << "One's shield raises slowly, as the others' appearance start to dissolve in the darkness\n", setColor(7);
+				Sleep(1500);
+				PlaySound(TEXT("ost\\plxsqd.wav"), NULL, SND_ASYNC | SND_LOOP);
+				Sleep(500);
 			}
 			else chooseSong();
 			battleStart_3v3(&player, &player2, &player3, &enemy, &enemy2, &enemy3);
 		}
 	}
-	else storyModeStart();
+	else forbidInteruptMenuTheme = true;
 }
 
 void programIntroduction()
@@ -1468,7 +1557,7 @@ void programIntroduction()
 			setColor(BO_RED);
 			std::cout << "\n\nDebuff status (or \"Bad effects\"):\n\n";
 			std::vector<std::string> debuffEff = { "Fragile", "Marked", "Poisoning", "Bleeding", "Taunted", "Silent", "Bind / Bound" };
-			std::vector<std::string> debuffDes = { "Amplifies the damage taken by affected unit by the exact % of effect", "Provided by \"Vengeful Spirit\", affected unit loses a certain amount of mana after a period of time, or being executed if they have less than required amount. In the event where the effect causer is      knocked down before the mark activates, it gets removed", "Provided by \"Henry Fat\", affected unit has to receive an amount of magic damage after everyturn, and reduce all incoming healing effect from them by 60%. In the event where the effect causer is       knocked down while the poison still persists, it will continue to cause damage until completely run out", "The next source of damage on affected unit removes this status and deals additional magic damage proportional to 20% of their max HP, this damage ignores up to 100 magic reist", "Affected unit is forced to use a normal attacker against the effect causer, regardless of their current state or trait", "Affected unit has their special abilities disabled during the effect duration", "Can not dodge nor graze incoming attacks" };
+			std::vector<std::string> debuffDes = { "Amplifies the damage taken by affected unit by the exact % of effect", "Provided by \"Vengeful Spirit\", affected unit loses a certain amount of mana after a period of time, or being executed if they have less than required amount. In the event where the effect causer is      knocked down before the mark activates, it gets removed", "Provided by \"Henry Fat\", affected unit has to receive an amount of magic damage after everyturn, and reduce all incoming healing effect from them by 60%. In the event where the effect causer is       knocked down while the poison still persists, it will continue to cause damage until completely run out", "The next source of damage on affected unit removes this status and deals additional magic damage proportional to 12% of their max HP", "Affected unit is forced to use a normal attacker against the effect causer, regardless of their current state or trait", "Affected unit has their special abilities disabled during the effect duration", "Can not dodge nor graze incoming attacks" };
 			for (int i = 0; i < debuffEff.size(); i++)
 			{
 				short flexibleColorCode;

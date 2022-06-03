@@ -28,35 +28,8 @@ void collectData(Entities* enemy, Entities* player1, Entities* player2, Entities
 
 	std::ifstream dataIn("saves\\ditmeluubao.dat");
 	std::ofstream storeData("saves\\data.dat");
-	std::string currentLine, wordToReplace;
+	std::string currentLine;
 	unsigned short lineNumber = 0;
-	switch (pack)
-	{
-	case 1:
-		wordToReplace = "P1";
-		break;
-	case 2:
-		wordToReplace = "P2";
-		break;
-	case 3:
-		wordToReplace = "P3";
-		break;
-	case 4:
-		wordToReplace = "P4";
-		break;
-	case 5:
-		wordToReplace = "P5";
-		break;
-	case 6:
-		wordToReplace = "P6";
-		break;
-	case 7:
-		wordToReplace = "P7";
-		break;
-	case 8:
-		wordToReplace = "P8";
-		break;
-	}
 	while (dataIn >> currentLine)
 	{
 		std::string ifSuperior = currentLine;
